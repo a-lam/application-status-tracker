@@ -18,7 +18,7 @@ import healthRouter from "./routes/health.js";
 import applicationsRouter from "./routes/applications.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const clientDist = path.resolve(__dirname, "../../../client/dist");
+const clientDist = path.resolve(__dirname, "../../client/dist");
 
 const app = express();
 const PORT = process.env.PORT ?? 3000;
