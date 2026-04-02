@@ -1,6 +1,6 @@
 [build]
 builder = "nixpacks"
-buildCommand = "npm install --prefix server && npm run build --prefix client && npm run db:generate --prefix server && npm run db:migrate --prefix server"
+buildCommand = "npm install --prefix client && npm install --prefix server && npm run build --prefix client && npm run db:generate --prefix server && npm run db:migrate --prefix server"
 
 [deploy]
 startCommand = "npm start --prefix server"
