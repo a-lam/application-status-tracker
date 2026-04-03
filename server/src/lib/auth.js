@@ -52,16 +52,33 @@ export function getAuth() {
       plugins: [
         magicLink({
           sendMagicLink: async ({ email, url }) => {
-            await getResend().emails.send({
-              from: process.env.RESEND_FROM_EMAIL,
-              to: email,
-              subject: "Your magic link",
-              html: `
+            const isDev = process.env.NODE_ENV === "development";
+            if (isDev) {
+              const apiKey = process.env.RESEND_API_KEY;
+              console.log(`[resend] Sending magic link to ${email}`);
+              console.log(`[resend] RESEND_API_KEY present: ${!!apiKey}, length: ${apiKey?.length ?? 0}, prefix: ${apiKey?.slice(0, 8) ?? "undefined"}`);
+              console.log(`[resend] RESEND_FROM_EMAIL: ${process.env.RESEND_FROM_EMAIL ?? "undefined"}`);
+            }
+            try {
+              const result = await getResend().emails.send({
+                from: process.env.RESEND_FROM_EMAIL,
+                to: email,
+                subject: "Your magic link",
+                html: `
                 <p>Click the link below to sign in. It expires in 15 minutes.</p>
                 <p><a href="${url}">Sign in</a></p>
                 <p>Or copy this link: ${url}</p>
               `,
-            });
+              });
+              if (result.error) {
+                console.error("[resend] Email send failed:", result.error);
+              } else if (isDev) {
+                console.log(`[resend] Email sent successfully, id: ${result.data?.id}`);
+              }
+            } catch (err) {
+              console.error("[resend] Unexpected error sending email:", err);
+              throw err;
+            }
           },
         }),
       ],

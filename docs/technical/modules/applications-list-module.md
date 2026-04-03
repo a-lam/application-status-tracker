@@ -1,6 +1,6 @@
 # Module: Applications List
 
-> **Last updated:** 2026-04-01
+> **Last updated:** 2026-04-03
 > **Feature requirements:** [requirements/features/applications-list.md](../../requirements/features/applications-list.md)
 > **Design:** [design/pages/applications-list.md](../../design/pages/applications-list.md)
 
@@ -46,8 +46,9 @@ client/src/
 
 Owns the data-fetching lifecycle and all mutation handlers (status toggle, delete). On mount, calls `GET /api/applications`. Passes the result array down to `ApplicationList`, or renders `EmptyState` if the array is empty.
 
-Renders two fixed controls in the page header:
+Renders three fixed controls in the page header:
 - **`+ Add an application`** — a `<Link>` styled as a primary button on the left; navigates to `/applications/new`.
+- **User email** — the authenticated user's email address, read from the `better-auth` client session (`authClient.useSession()` or equivalent), displayed as plain text immediately to the left of the page-level kebab button.
 - **Page-level kebab menu** — a `⋮` button on the right that opens a dropdown with a single "Logout" action. Clicking Logout calls `authClient.signOut()` then navigates to `/login`. The menu closes when the user clicks outside it.
 
 Passes `onStatusToggle` and `onDeleteRequest` handlers down to `ApplicationCard` via `ApplicationList`.
@@ -273,6 +274,7 @@ enum ApplicationStatus {
 | `better-auth` | `routes/applications.js` | Validate session and extract `userId` |
 | `express` | `routes/applications.js` | Route handlers |
 | React state (`useState`, `useEffect`, `useRef`) | `ApplicationsListPage` | Fetch lifecycle, optimistic state management, and page-level menu |
+| `better-auth` client (`authClient.useSession`) | `ApplicationsListPage` | Read the active session to display the user's email in the header |
 | `better-auth` client (`authClient.signOut`) | `ApplicationsListPage` | End the user's session on logout |
 | `ResizeObserver` | `ApplicationCard` | Detect description overflow after render |
 

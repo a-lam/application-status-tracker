@@ -1,6 +1,6 @@
 # Feature: Applications List
 
-> **Last updated:** 2026-04-01
+> **Last updated:** 2026-04-03
 > **Status:** Requirements defined — not yet implemented
 > **Default page:** This is the default destination for all signed-in users. Any unauthenticated visit to the app root redirects to the login page.
 
@@ -128,10 +128,11 @@
 | # | Given | When | Then |
 |---|-------|------|------|
 | AC-17-1 | I am on the applications list page | The page loads | A `⋮` (kebab) menu button is visible in the top-right corner of the page header |
-| AC-17-2 | I click the page-level `⋮` button | The menu opens | I see a "Logout" option |
-| AC-17-3 | I click "Logout" | — | My session is terminated server-side and I am redirected to the sign-in page |
-| AC-17-4 | I have logged out | I attempt to navigate to any protected route | I am redirected to the sign-in page |
-| AC-17-5 | I click outside the open page-level menu | — | The menu closes and no action is taken |
+| AC-17-2 | I am on the applications list page | The page loads | My email address is displayed immediately to the left of the page-level `⋮` button |
+| AC-17-3 | I click the page-level `⋮` button | The menu opens | I see a "Logout" option |
+| AC-17-4 | I click "Logout" | — | My session is terminated server-side and I am redirected to the sign-in page |
+| AC-17-5 | I have logged out | I attempt to navigate to any protected route | I am redirected to the sign-in page |
+| AC-17-6 | I click outside the open page-level menu | — | The menu closes and no action is taken |
 
 > Session invalidation behaviour is governed by [requirements/features/authentication.md — US-02](authentication.md).
 
@@ -173,6 +174,7 @@
 | FR-APPS-15 | The Delete Application action must display a confirmation dialog naming the specific application before any data is removed; cancelling must leave the application untouched. |
 | FR-APPS-16 | All mutating operations (status update, edit, delete) must verify the requesting user owns the application — HTTP 403 if not. |
 | FR-APPS-17 | A page-level `⋮` kebab menu must be present in the top-right of the page header; it must contain a "Logout" action that invalidates the session server-side and redirects the user to the sign-in page. |
+| FR-APPS-18 | The authenticated user's email address must be displayed immediately to the left of the page-level `⋮` button in the page header. The email is read from the active session and requires no separate API call. |
 
 ---
 

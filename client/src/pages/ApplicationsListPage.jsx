@@ -13,6 +13,7 @@ export default function ApplicationsListPage() {
   const [pendingDelete, setPendingDelete] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef(null);
+  const { data: session } = authClient.useSession();
   const pendingDeleteTriggerRef = useRef(null);
   const navigate = useNavigate();
 
@@ -81,31 +82,38 @@ export default function ApplicationsListPage() {
         <Link to="/applications/new" className="btn btn-primary">
           + Add an application
         </Link>
-        <div className="kebab-menu" ref={menuRef}>
-          <button
-            type="button"
-            className="kebab-menu__trigger"
-            aria-haspopup="menu"
-            aria-expanded={menuOpen}
-            aria-label="Page options"
-            onClick={() => setMenuOpen((v) => !v)}
-          >
-            ⋮
-          </button>
-          {menuOpen && (
-            <ul className="kebab-menu__dropdown" role="menu">
-              <li role="none">
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="kebab-menu__item"
-                  onClick={handleLogout}
-                >
-                  Logout
-                </button>
-              </li>
-            </ul>
+        <div className="page-header__right">
+          {session?.user?.email && (
+            <span className="page-header__user-email" aria-hidden="true">
+              {session.user.email}
+            </span>
           )}
+          <div className="kebab-menu" ref={menuRef}>
+            <button
+              type="button"
+              className="kebab-menu__trigger"
+              aria-haspopup="menu"
+              aria-expanded={menuOpen}
+              aria-label="Page options"
+              onClick={() => setMenuOpen((v) => !v)}
+            >
+              ⋮
+            </button>
+            {menuOpen && (
+              <ul className="kebab-menu__dropdown" role="menu">
+                <li role="none">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="kebab-menu__item"
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </button>
+                </li>
+              </ul>
+            )}
+          </div>
         </div>
       </div>
 

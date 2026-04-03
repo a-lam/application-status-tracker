@@ -1,6 +1,6 @@
 # Page: Applications List
 
-> **Last updated:** 2026-04-01
+> **Last updated:** 2026-04-03
 > **Feature requirements:** [requirements/features/applications-list.md](../../requirements/features/applications-list.md)
 > **Technical module:** [technical/modules/applications-list-module.md](../../technical/modules/applications-list-module.md)
 
@@ -18,7 +18,7 @@ Users land here after signing in and whenever they return to the app.
 
 | Component | Role |
 |-----------|------|
-| `ApplicationsListPage` | Page shell, owns fetch state, renders layout; contains the `+ Add an application` button and the page-level kebab menu |
+| `ApplicationsListPage` | Page shell, owns fetch state, renders layout; contains the `+ Add an application` button, the authenticated user's email address, and the page-level kebab menu |
 | `ApplicationList` | Renders the ordered list of cards |
 | `ApplicationCard` | Displays one application with urgency colour applied |
 | `KebabMenu` | Three-dot menu on each card; exposes Update Status, Edit, Delete actions |
@@ -81,7 +81,7 @@ If the user's session expires while they are on this page, they are automaticall
 
 ### Page menu (top-right `⋮`)
 
-The page header contains a `⋮` (three-dot vertical) icon in the top-right corner. Clicking it opens a small dropdown with:
+The page header contains the authenticated user's email address displayed as plain text, immediately followed by a `⋮` (three-dot vertical) icon in the top-right corner. Clicking the icon opens a small dropdown with:
 
 1. **Logout** — ends the user's session server-side and redirects to the sign-in page
 
@@ -117,7 +117,7 @@ Clicking outside the open menu closes it without taking any action.
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  [+ Add an application]                         [⋮]    │
+│  [+ Add an application]       user@example.com   [⋮]   │
 ├────────────────────────────────────────────────────────┤
 │ ┌──────────────────────────────────────────────────┐   │
 │ │ bgcolor: light red                               │   │
@@ -205,7 +205,7 @@ Clicking outside the open menu closes it without taking any action.
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  [+ Add an application]                         [⋮] ←  │
+│  [+ Add an application]       user@example.com   [⋮] ← │
 │                                                ┌──────┤ │
 │                                           Logout│      │ │
 │                                                └──────┘ │
@@ -216,7 +216,7 @@ Clicking outside the open menu closes it without taking any action.
 
 ```
 ┌────────────────────────────────────────────────────────┐
-│  [+ Add an application]                         [⋮]    │
+│  [+ Add an application]       user@example.com   [⋮]   │
 ├────────────────────────────────────────────────────────┤
 │                                                        │
 │                                                        │
@@ -267,6 +267,7 @@ Each card consistently presents fields in the same order:
 - Each card must have a descriptive `aria-label` (e.g. "Application: Senior Frontend Engineer at Acme Corp")
 - Colour alone must not be the only indicator of urgency — the days-remaining text in the due date (e.g. "(3 days away)", "(Today)") provides a secondary, non-colour cue for users with colour vision deficiency
 - The `+ Add an application` button has visible text and does not require an `aria-label`
+- The user email in the header is presentational; it must not receive keyboard focus and does not require an interactive role
 - The page-level `⋮` button must have `aria-label="Page options"` and must manage `aria-expanded` and `aria-haspopup="menu"`; clicking outside must close the menu without taking any action
 - The per-card kebab `⋮` button must have an `aria-label` identifying the application (e.g. "Options for Senior Frontend Engineer at Acme Corp") and must manage `aria-expanded` and `aria-haspopup="menu"`
 - Each menu item inside the kebab dropdown must be a `role="menuitem"` element; the dropdown itself must be `role="menu"`
