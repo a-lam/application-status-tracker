@@ -4,14 +4,14 @@ import ConfirmationMessage from "../components/auth/ConfirmationMessage.jsx";
 import { usePageTitle } from "../hooks/usePageTitle.js";
 
 export default function LoginPage() {
-  usePageTitle("Sign In — Application Status Tracker");
+  usePageTitle("Sign In — Applications Tracker");
   const [state, setState] = useState("idle"); // idle | sent
   const [sentEmail, setSentEmail] = useState("");
 
   return (
     <div className="login-page">
       <div className="login-card">
-        <h1 className="login-title">Application Status Tracker</h1>
+        <h1 className="login-title">Applications Tracker</h1>
 
         {state === "idle" && (
           <>

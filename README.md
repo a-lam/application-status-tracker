@@ -1,4 +1,4 @@
-# Application Status Tracker
+# Applications Tracker
 
 A full-stack web application for tracking the lifecycle of applications — job applications, grants, submissions, or any multi-stage process. Sign in with Google, GitHub, or a passwordless magic link.
 
@@ -144,5 +144,4 @@ Railway performs a health check against `GET /health` after each deploy. See [do
 
 ## Documentation
 
-- [Requirements & User Stories](docs/requirements.md)
-- [Technical Specifications](docs/technical-specs.md)
+See [docs/README.md](docs/README.md) for the full index of requirements, technical specs, and design documents.

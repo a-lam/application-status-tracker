@@ -8,7 +8,7 @@ import DeleteConfirmDialog from "../components/applications/DeleteConfirmDialog.
 import { usePageTitle } from "../hooks/usePageTitle.js";
 
 export default function ApplicationsListPage() {
-  usePageTitle("Application Status Tracker");
+  usePageTitle("Applications Tracker");
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

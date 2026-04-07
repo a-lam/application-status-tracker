@@ -1,6 +1,6 @@
 # Docs
 
-Documentation for the Application Status Tracker project.
+Documentation for the Applications Tracker project.
 
 ---
 

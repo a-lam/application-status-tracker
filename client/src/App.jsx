@@ -42,7 +42,11 @@ function RootRedirect() {
 
 export default function App() {
   return (
-    <Routes>
+    <>
+      {import.meta.env.DEV && (
+        <div className="dev-banner" aria-hidden="true">Development</div>
+      )}
+      <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
       <Route
@@ -71,5 +75,6 @@ export default function App() {
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   );
 }

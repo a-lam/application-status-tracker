@@ -6,7 +6,7 @@
 
 ## Description
 
-**Application Status Tracker** is a full-stack web application that allows authenticated users to track the status of applications — job applications, grant applications, or any multi-stage submission process. Users sign in via a passwordless magic link email, and can create, update, and monitor the lifecycle of their tracked items.
+**Applications Tracker** is a full-stack web application that allows authenticated users to track the status of applications — job applications, grant applications, or any multi-stage submission process. Users sign in via a passwordless magic link email, and can create, update, and monitor the lifecycle of their tracked items.
 
 ---
 

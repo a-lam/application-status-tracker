@@ -5,7 +5,7 @@ import ApplicationForm from "../components/applications/ApplicationForm.jsx";
 import { usePageTitle } from "../hooks/usePageTitle.js";
 
 export default function EditApplicationPage() {
-  usePageTitle("Edit Application — Application Status Tracker");
+  usePageTitle("Edit Application — Applications Tracker");
   const { id } = useParams();
   const navigate = useNavigate();
 

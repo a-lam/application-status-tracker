@@ -27,7 +27,7 @@ const INITIAL_FORM = {
 };
 
 export default function AddApplicationPage() {
-  usePageTitle("Add Application — Application Status Tracker");
+  usePageTitle("Add Application — Applications Tracker");
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [serverErrors, setServerErrors] = useState({});
