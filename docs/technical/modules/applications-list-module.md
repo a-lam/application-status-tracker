@@ -32,14 +32,14 @@ server/src/
 client/src/
 ├── pages/
 │   └── ApplicationsListPage.jsx   ← Top-level page, owns fetch state and mutation handlers;
-│                                      renders the "+ Add an application" button and the
-│                                      page-level kebab menu (Logout)
+│                                      renders the add-application button, the aria-live
+│                                      announcement region, and the page-level kebab menu (Logout)
 └── components/
     └── applications/
         ├── ApplicationCard.jsx      ← Single application container with urgency colour
         ├── ApplicationList.jsx      ← Renders the ordered list of ApplicationCards
         ├── KebabMenu.jsx            ← Three-dot dropdown per card; exposes Update Status, Edit, Delete
-        ├── DeleteConfirmDialog.jsx  ← Modal prompt before a delete is confirmed
+        ├── DeleteConfirmDialog.jsx  ← Native <dialog> modal prompt before a delete is confirmed
         ├── ArtifactsPanel.jsx       ← Collapsible panel showing per-artifact completion state; rendered inside each ApplicationCard
         └── EmptyState.jsx           ← Shown when the user has no applications
 ```
@@ -49,9 +49,11 @@ client/src/
 Owns the data-fetching lifecycle and all mutation handlers (status toggle, delete). On mount, calls `GET /api/applications`. Passes the result array down to `ApplicationList`, or renders `EmptyState` if the array is empty.
 
 Renders three fixed controls in the page header:
-- **`+ Add an application`** — a `<Link>` styled as a primary button on the left; navigates to `/applications/new`.
-- **User email** — the authenticated user's email address, read from the `better-auth` client session (`authClient.useSession()` or equivalent), displayed as plain text immediately to the left of the page-level kebab button.
+- **Add-application button** — a `<Link>` styled as a primary button on the left; navigates to `/applications/new`. Carries `aria-label="Add an application"` at all viewports. At viewports wider than 480 px the visible label reads `+ Add an application`; at 480 px and narrower it collapses to `+`. Both text spans are `aria-hidden`; the accessible name comes from the `aria-label` alone.
+- **User email** — the authenticated user's email address, read from the `better-auth` client session (`authClient.useSession()`), displayed as plain text immediately to the left of the page-level kebab button. Hidden at viewports ≤ 480 px to prevent header crowding.
 - **Page-level kebab menu** — a `⋮` button on the right that opens a dropdown with a single "Logout" action. Clicking Logout calls `authClient.signOut()` then navigates to `/login`. The menu closes when the user clicks outside it.
+
+Also renders a visually-hidden `aria-live="polite" role="status"` region. After a successful status toggle, this region is populated with a confirmation string (e.g. "Software Engineer at Acme marked as Submitted.") so screen readers can announce the outcome without requiring focus to move.
 
 Passes `onStatusToggle` and `onDeleteRequest` handlers down to `ApplicationCard` via `ApplicationList`.
 
@@ -76,6 +78,10 @@ Renders a single application's fields. Calls `getUrgencyBand(dueDate)` to determ
 - "Job Description:" label followed by Job Description text (truncated to 6 lines with "show more" if content overflows)
 - `ArtifactsPanel` — collapsible artifacts section, collapsed by default
 
+**CSS contrast override:** The `.app-card` rule sets `--text-3: #4b5563` (darker than the global `#6b7280`). This ensures all elements using `var(--text-3)` within a card — employer name, description label, status text, artifacts arrow — meet WCAG AA contrast (≥ 4.5:1) against every urgency-band background colour.
+
+**Mobile card layout:** At viewports ≤ 480 px the `.app-card__header` row (employer + due date) switches to `flex-direction: column` so the two fields stack vertically instead of competing for horizontal space.
+
 ### `KebabMenu`
 
 Renders a `⋮` button. When clicked, opens a dropdown with three `role="menuitem"` entries:
@@ -86,11 +92,15 @@ Renders a `⋮` button. When clicked, opens a dropdown with three `role="menuite
 
 Clicking outside the open menu closes it without any side effect.
 
+The trigger button has a minimum hit area of 44 × 44 px (`min-width` and `min-height`) to meet mobile touch-target requirements.
+
 ### `ArtifactsPanel`
 
 Renders the artifact completion section inside `ApplicationCard`. Collapsed by default.
 
-**Header:** always visible, acts as the toggle trigger. Displays `▶ Artifacts (X/Y completed)` when collapsed and `▼ Artifacts (X/Y completed)` when expanded, where X is the count of artifacts whose `completed` field is `true` and Y is the total number of artifacts.
+**Header:** always visible, acts as the toggle trigger. Displays `▶ Show artifacts (X/Y completed)` when collapsed and `▼ Hide artifacts (X/Y completed)` when expanded, where X is the count of artifacts whose `completed` field is `true` and Y is the total number of artifacts. The "Show" / "Hide" prefix makes the button's purpose unambiguous without relying on `aria-expanded` alone.
+
+The toggle button has a minimum height of 44 px to meet mobile touch-target requirements.
 
 **Expanded state:** each artifact is rendered as its own row containing a `<input type="checkbox">` (checked when `artifact.completed === true`) and the artifact label. Clicking the checkbox calls `onArtifactToggle(artifactId, !artifact.completed)`.
 
@@ -102,7 +112,11 @@ Renders the artifact completion section inside `ApplicationCard`. Collapsed by d
 
 ### `DeleteConfirmDialog`
 
-A modal dialog (`role="dialog"`, `aria-modal="true"`) that appears when a delete is requested. Displays the job title and employer of the targeted application. Offers two actions: **Confirm Delete** (calls `onDeleteConfirm(id)`) and **Cancel** (calls `onDeleteCancel`). Focus is trapped inside while open; on close, focus returns to the triggering kebab button.
+A modal implemented using the native HTML `<dialog>` element with `showModal()`. Displays the job title and employer of the targeted application. Offers two actions: **Confirm Delete** (calls `onDeleteConfirm(id)`) and **Cancel** (calls `onDeleteCancel`).
+
+Using `showModal()` gives the dialog browser-native top-layer stacking, automatic focus trapping, and Escape-key handling (via the `cancel` event). The `::backdrop` pseudo-element is styled to provide the semi-transparent overlay. On unmount, focus returns to the element that triggered the dialog.
+
+Click-outside is detected by comparing the pointer coordinates against the dialog's bounding rect on each click event — if the click lands outside the rect, `onCancel` is called.
 
 ### `getUrgencyBand(dueDate)` — pure utility
 
@@ -146,6 +160,22 @@ The job description is clamped to 6 lines using CSS (`-webkit-line-clamp: 6`). A
 
 ---
 
+## CSS Architecture Notes
+
+### Reduced motion
+
+All CSS `transition` declarations are wrapped in `@media (prefers-reduced-motion: no-preference)` blocks. When the user has requested reduced motion at the OS level, no animations or transitions are applied anywhere in the application.
+
+### Touch targets
+
+`.kebab-menu__trigger` and `.artifacts-panel__toggle` both carry `min-width: 44px` and `min-height: 44px` respectively, ensuring a minimum 44 × 44 px hit area on touch devices in line with WCAG 2.5.5 guidance.
+
+### Screen-reader utility
+
+A `.sr-only` class (position absolute, 1 × 1 px, clipped) is defined globally. It is used by the `aria-live` status region in `ApplicationsListPage`.
+
+---
+
 ## Data Flow
 
 ### Page Load
@@ -181,6 +211,7 @@ The job description is clamped to 6 lines using CSS (`-webkit-line-clamp: 6`). A
 5. Server updates the record and returns the updated application
 6. ApplicationsListPage updates the application in local state
    → KebabMenu closes; card title line re-renders with new status
+   → aria-live region is populated with a confirmation string
    (no full page reload)
 ```
 
@@ -201,13 +232,15 @@ The job description is clamped to 6 lines using CSS (`-webkit-line-clamp: 6`). A
 ```
 1. User clicks "Delete Application" from KebabMenu
 2. KebabMenu calls onDeleteRequest(id) → DeleteConfirmDialog opens
-3a. User clicks Cancel → dialog closes; no request made
+   → showModal() called on the native <dialog>; focus moves to Confirm Delete button
+3a. User clicks Cancel → dialog closes; no request made; focus returns to kebab trigger
 3b. User clicks Confirm Delete
     → ApplicationsListPage calls DELETE /api/applications/:id
     → Server validates session and ownership → 401/403 if invalid
     → Server deletes application and all related artifacts (cascade)
     → Returns 204 No Content
     → ApplicationsListPage removes the card from local state
+    → Focus returns to kebab trigger
 ```
 
 ### Logout
@@ -294,6 +327,7 @@ For `PATCH /api/artifacts/:id/completed`, the server must look up the artifact's
 | `better-auth` client (`authClient.useSession`) | `ApplicationsListPage` | Read the active session to display the user's email in the header |
 | `better-auth` client (`authClient.signOut`) | `ApplicationsListPage` | End the user's session on logout |
 | `ResizeObserver` | `ApplicationCard` | Detect description overflow after render |
+| Native `<dialog>` / `showModal()` | `DeleteConfirmDialog` | Browser-native modal with top-layer stacking, focus trapping, and Escape handling |
 
 ---
 

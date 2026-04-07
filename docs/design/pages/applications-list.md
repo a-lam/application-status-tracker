@@ -18,11 +18,11 @@ Users land here after signing in and whenever they return to the app.
 
 | Component | Role |
 |-----------|------|
-| `ApplicationsListPage` | Page shell, owns fetch state, renders layout; contains the `+ Add an application` button, the authenticated user's email address, and the page-level kebab menu |
+| `ApplicationsListPage` | Page shell, owns fetch state, renders layout; contains the add-application button, the authenticated user's email address, the aria-live announcement region, and the page-level kebab menu |
 | `ApplicationList` | Renders the ordered list of cards |
 | `ApplicationCard` | Displays one application with urgency colour applied |
 | `KebabMenu` | Three-dot menu on each card; exposes Update Status, Edit, Delete actions |
-| `DeleteConfirmDialog` | Modal prompt shown before a delete is confirmed |
+| `DeleteConfirmDialog` | Native `<dialog>` modal prompt shown before a delete is confirmed |
 | `ArtifactsPanel` | Collapsible artifact completion panel rendered inside each `ApplicationCard` |
 | `EmptyState` | Shown when the user has no applications |
 
@@ -47,12 +47,12 @@ The background colour of each `ApplicationCard` is determined solely by how far 
 
 | Urgency band | Condition | Background |
 |---|---|---|
-| Past | Today is the day after the due date or later (today > due date) | Light grey (`#f0f0f0` or similar) |
-| Urgent | Due date is today or within the next 3 days (due today is not past due) | Light red (`#fde8e8` or similar) |
-| Soon | Due in 4 – 7 days | Light yellow (`#fef9c3` or similar) |
-| Future | Due in 8+ days | Light green (`#dcfce7` or similar) |
+| Past | Today is the day after the due date or later (today > due date) | Light grey (`#f0f0f0`) |
+| Urgent | Due date is today or within the next 3 days (due today is not past due) | Light red (`#fde8e8`) |
+| Soon | Due in 4 – 7 days | Light yellow (`#fef9c3`) |
+| Future | Due in 8+ days | Light green (`#dcfce7`) |
 
-Exact colour values will be confirmed at implementation time. These are reference shades — light enough to keep body text readable at normal contrast ratios.
+All cards scope the CSS custom property `--text-3` to `#4b5563` (darker than the global value of `#6b7280`). This ensures secondary text elements — employer name, description label, status text, artifacts arrow — achieve a contrast ratio of at least 4.5:1 against every urgency-band background, meeting WCAG AA.
 
 ---
 
@@ -63,18 +63,20 @@ Exact colour values will be confirmed at implementation time. These are referenc
 - The page fetches all applications for the current user
 - Applications are displayed in due-date order, earliest at the top
 - Each card receives its urgency colour band automatically
-- The `+ Add an application` button is always visible regardless of list state
+- The add-application button is always visible regardless of list state
 - The page-level `⋮` menu is always visible in the top-right corner
 
 ### Empty state
 
 When the user has no applications:
 - A friendly message is shown explaining the list is empty
-- A call-to-action prompts the user to add their first application (same action as the `+ Add an application` button)
+- A call-to-action prompts the user to add their first application (same action as the add-application button)
 
 ### Add application
 
-- Clicking `+ Add an application` navigates to the add-application flow at `/applications/new`
+- Clicking the add-application button navigates to the add-application flow at `/applications/new`
+- At viewports wider than 480 px the button reads `+ Add an application`
+- At viewports 480 px wide and narrower the button collapses to `+` only
 
 ### Session expiry
 
@@ -82,7 +84,7 @@ If the user's session expires while they are on this page, they are automaticall
 
 ### Page menu (top-right `⋮`)
 
-The page header contains the authenticated user's email address displayed as plain text, immediately followed by a `⋮` (three-dot vertical) icon in the top-right corner. Clicking the icon opens a small dropdown with:
+The page header contains the authenticated user's email address (hidden on mobile viewports ≤ 480 px) displayed as plain text, immediately followed by a `⋮` (three-dot vertical) icon in the top-right corner. Clicking the icon opens a small dropdown with:
 
 1. **Logout** — ends the user's session server-side and redirects to the sign-in page
 
@@ -94,6 +96,7 @@ Each card has a `⋮` (three-dot vertical) icon in the top-right corner. Clickin
    - If the application is currently `NOT_SUBMITTED`, the label reads "Update Status — Submitted"
    - If the application is currently `SUBMITTED`, the label reads "Update Status — Not Submitted"
    - Clicking immediately toggles the status (no confirmation required) and closes the menu; the card title line updates in place
+   - A screen-reader announcement confirms the result (e.g. "Software Engineer at Acme marked as Submitted.")
 
 2. **Edit Application**
    - Navigates to `/applications/:id/edit`
@@ -114,7 +117,7 @@ Clicking outside the open menu closes it without taking any action.
 
 ## Wireframe Description
 
-### Populated list
+### Populated list — desktop
 
 ```
 ┌────────────────────────────────────────────────────────┐
@@ -130,7 +133,7 @@ Clicking outside the open menu closes it without taking any action.
 │ │  We are looking for an experienced engineer...   │   │
 │ │  [show more]  ← only shown when text > 6 lines   │   │
 │ │                                                  │   │
-│ │  ▶ Artifacts (2/3 completed)                    │   │
+│ │  ▶ Show artifacts (2/3 completed)               │   │
 │ └──────────────────────────────────────────────────┘   │
 │                                                        │
 │ ┌──────────────────────────────────────────────────┐   │
@@ -143,7 +146,7 @@ Clicking outside the open menu closes it without taking any action.
 │ │  Designing for a platform used by millions...    │   │
 │ │  [show more]  ← only shown when text > 6 lines   │   │
 │ │                                                  │   │
-│ │  ▶ Artifacts (0/3 completed)                    │   │
+│ │  ▶ Show artifacts (0/3 completed)               │   │
 │ └──────────────────────────────────────────────────┘   │
 │                                                        │
 │ ┌──────────────────────────────────────────────────┐   │
@@ -154,7 +157,7 @@ Clicking outside the open menu closes it without taking any action.
 │ │  Job Description:                                │   │
 │ │  Join our infrastructure team to build...        │   │
 │ │                                                  │   │
-│ │  ▶ Artifacts (0/2 completed)                    │   │
+│ │  ▶ Show artifacts (0/2 completed)               │   │
 │ └──────────────────────────────────────────────────┘   │
 │                                                        │
 │ ┌──────────────────────────────────────────────────┐   │
@@ -165,12 +168,36 @@ Clicking outside the open menu closes it without taking any action.
 │ │  Job Description:                                │   │
 │ │  A fast-growing SaaS company...                  │   │
 │ │                                                  │   │
-│ │  ▶ Artifacts (2/2 completed)                    │   │
+│ │  ▶ Show artifacts (2/2 completed)               │   │
 │ └──────────────────────────────────────────────────┘   │
 └────────────────────────────────────────────────────────┘
 ```
 
 > **Note:** Dates shown relative to today (1 Apr 2026) for illustration. Acme Corp (2 days away) = urgent/red. Globex Inc (5 days away) = soon/yellow. Initech (19 days away) = future/green. Umbrella Ltd (past due) = grey, no suffix. Acme Corp shows a full salary range; Globex Inc shows a min-only salary; Initech and Umbrella Ltd have no salary data so no salary line is rendered.
+
+### Populated list — mobile (≤ 480 px)
+
+```
+┌────────────────────────────────┐
+│  [+]                      [⋮]  │  ← email hidden; button collapses to "+"
+├────────────────────────────────┤
+│ ┌──────────────────────────┐   │
+│ │ bgcolor: light red       │   │
+│ │  Senior Frontend         │   │
+│ │  Engineer (Submitted) [⋮]│   │
+│ │  Acme Corp               │   │  ← employer and due date stack vertically
+│ │  Due: 3 Apr 2026         │   │
+│ │  (2 days away)           │   │
+│ │  $90,000–$120,000 CAD    │   │
+│ │                          │   │
+│ │  Job Description:        │   │
+│ │  We are looking for...   │   │
+│ │  [show more]             │   │
+│ │                          │   │
+│ │  ▶ Show artifacts (2/3)  │   │
+│ └──────────────────────────┘   │
+└────────────────────────────────┘
+```
 
 ### Artifacts panel — expanded state
 
@@ -184,14 +211,14 @@ Clicking outside the open menu closes it without taking any action.
 │ │  We are looking for an experienced engineer...   │   │
 │ │  [show more]                                     │   │
 │ │                                                  │   │
-│ │  ▼ Artifacts (2/3 completed)                    │   │
+│ │  ▼ Hide artifacts (2/3 completed)               │   │
 │ │    ☑ CV                                         │   │
 │ │    ☑ Cover Letter                               │   │
 │ │    ☐ Portfolio                                  │   │
 │ └──────────────────────────────────────────────────┘   │
 ```
 
-> Clicking the `▼ Artifacts (2/3 completed)` header collapses the panel. Clicking a checkbox immediately updates the checked state and recalculates the count in the header.
+> Clicking the `▼ Hide artifacts (2/3 completed)` header collapses the panel and the label reverts to `▶ Show artifacts (2/3 completed)`. Clicking a checkbox immediately updates the checked state and recalculates the count in the header.
 
 ---
 
@@ -270,14 +297,14 @@ Each card consistently presents fields in the same order:
 │  [Description text — clamped to 6 lines]          │
 │  [show more]  ← only rendered when text overflows │
 │                                                   │
-│  ▶ Artifacts (X/Y completed)   ← collapsed        │
+│  ▶ Show artifacts (X/Y completed)  ← collapsed    │
 └──────────────────────────────────────────────────┘
 
 Expanded:
 
 ┌──────────────────────────────────────────────────┐
 │  ...                                             │
-│  ▼ Artifacts (X/Y completed)   ← expanded        │
+│  ▼ Hide artifacts (X/Y completed)  ← expanded    │
 │    ☑ [Artifact label]                            │
 │    ☐ [Artifact label]                            │
 │    ☐ [Artifact label]                            │
@@ -311,14 +338,18 @@ Expanded:
 
 - Each card must have a descriptive `aria-label` (e.g. "Application: Senior Frontend Engineer at Acme Corp")
 - Colour alone must not be the only indicator of urgency — the days-remaining text in the due date (e.g. "(3 days away)", "(Today)") provides a secondary, non-colour cue for users with colour vision deficiency
-- The `+ Add an application` button has visible text and does not require an `aria-label`
-- The user email in the header is presentational; it must not receive keyboard focus and does not require an interactive role
+- The add-application button carries `aria-label="Add an application"` at all viewport widths. Both the full-text span and the compact `+` span are `aria-hidden`; the accessible name comes entirely from the `aria-label`
+- The user email in the header is presentational (`aria-hidden="true"`); it must not receive keyboard focus and does not require an interactive role. It is hidden at mobile viewports (≤ 480 px) via CSS
 - The page-level `⋮` button must have `aria-label="Page options"` and must manage `aria-expanded` and `aria-haspopup="menu"`; clicking outside must close the menu without taking any action
 - The per-card kebab `⋮` button must have an `aria-label` identifying the application (e.g. "Options for Senior Frontend Engineer at Acme Corp") and must manage `aria-expanded` and `aria-haspopup="menu"`
 - Each menu item inside the kebab dropdown must be a `role="menuitem"` element; the dropdown itself must be `role="menu"`
-- The delete confirmation dialog must use `role="dialog"` with `aria-modal="true"` and an `aria-labelledby` pointing to the dialog heading; focus must be trapped inside while it is open and returned to the triggering element on close
+- After a successful status toggle, a visually-hidden `aria-live="polite" role="status"` region is updated with a confirmation string (e.g. "Software Engineer at Acme marked as Submitted.") so screen readers announce the outcome without moving focus
+- The delete confirmation dialog is implemented using a native `<dialog>` element with `showModal()`. The browser provides top-layer stacking, automatic focus trapping, and Escape-key handling. The dialog carries `aria-labelledby` pointing to its heading. On close, focus returns to the element that triggered the dialog
 - The "show more" / "show less" description toggle must have a descriptive `aria-label` and must update `aria-expanded` accordingly
 - The "show more" control must not be rendered at all when the description does not overflow 6 lines — do not render it hidden, as screen readers would still announce it
-- The artifacts panel toggle must use a `<button>` element with `aria-expanded` set to `"true"` or `"false"` reflecting the current panel state, and `aria-controls` pointing to the panel's content element
-- Each artifact checkbox must have an accessible label (either a `<label>` element or `aria-label`) containing the artifact's label text
+- The artifacts panel toggle must use a `<button>` element with `aria-expanded` set to `"true"` or `"false"` reflecting the current panel state, and `aria-controls` pointing to the panel's content element. The button label reads "Show artifacts (X/Y completed)" when collapsed and "Hide artifacts (X/Y completed)" when expanded, making the action explicit without relying on `aria-expanded` alone
+- Each artifact checkbox must have an accessible label (a wrapping `<label>` element) containing the artifact's label text
 - The artifact list container must have `role="list"` and each row must be `role="listitem"` so screen readers announce the structure correctly
+- All interactive controls (kebab trigger buttons, artifacts panel toggle, add-application button) must have a minimum touch target size of 44 × 44 px
+- All CSS transitions must be disabled when `prefers-reduced-motion: reduce` is set at the OS level
+- Secondary text within cards (employer name, status, description label, artifacts arrow) must achieve a contrast ratio of at least 4.5:1 against all urgency-band backgrounds. This is enforced by scoping `--text-3` to `#4b5563` within `.app-card`

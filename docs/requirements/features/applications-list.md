@@ -1,7 +1,7 @@
 # Feature: Applications List
 
 > **Last updated:** 2026-04-07
-> **Status:** Requirements defined — not yet implemented
+> **Status:** Implemented
 > **Default page:** This is the default destination for all signed-in users. Any unauthenticated visit to the app root redirects to the login page.
 
 ---
@@ -83,8 +83,9 @@
 
 | # | Given | When | Then |
 |---|-------|------|------|
-| AC-13-1 | I am on the applications list page | The page loads | A `+ Add an application` button is visible in the top-left of the page header |
-| AC-13-2 | I am on the applications list page | I click `+ Add an application` | I am taken to the add application page (`/applications/new`) |
+| AC-13-1 | I am on the applications list page on a desktop or tablet viewport | The page loads | A `+ Add an application` button is visible in the top-left of the page header |
+| AC-13-1b | I am on the applications list page on a mobile viewport (≤ 480 px wide) | The page loads | The button in the top-left of the page header collapses to a single `+` character to save space |
+| AC-13-2 | I am on the applications list page | I activate the add-application button (full or compact form) | I am taken to the add application page (`/applications/new`) |
 
 > Full add-application behaviour is documented in [requirements/features/add-application.md](add-application.md).
 
@@ -103,7 +104,8 @@
 | AC-14-3 | The application's current status is `NOT_SUBMITTED` | The menu opens | The first option reads "Update Status — Submitted" |
 | AC-14-4 | The application's current status is `SUBMITTED` | The menu opens | The first option reads "Update Status — Not Submitted" |
 | AC-14-5 | I click "Update Status — [target status]" | The action completes | The status is toggled, the menu closes, and the job title line on the card updates to reflect the new status without a full page reload |
-| AC-14-6 | I click outside an open kebab menu | — | The menu closes and no action is taken |
+| AC-14-6 | I click "Update Status — [target status]" | The action completes | An announcement is made to screen readers confirming the new status (e.g. "Software Engineer at Acme marked as Submitted.") |
+| AC-14-7 | I click outside an open kebab menu | — | The menu closes and no action is taken |
 
 ---
 
@@ -132,7 +134,8 @@
 | # | Given | When | Then |
 |---|-------|------|------|
 | AC-17-1 | I am on the applications list page | The page loads | A `⋮` (kebab) menu button is visible in the top-right corner of the page header |
-| AC-17-2 | I am on the applications list page | The page loads | My email address is displayed immediately to the left of the page-level `⋮` button |
+| AC-17-2 | I am on the applications list page on a desktop or tablet viewport | The page loads | My email address is displayed immediately to the left of the page-level `⋮` button |
+| AC-17-2b | I am on the applications list page on a mobile viewport (≤ 480 px wide) | The page loads | My email address is hidden to prevent the header from becoming crowded |
 | AC-17-3 | I click the page-level `⋮` button | The menu opens | I see a "Logout" option |
 | AC-17-4 | I click "Logout" | — | My session is terminated server-side and I am redirected to the sign-in page |
 | AC-17-5 | I have logged out | I attempt to navigate to any protected route | I am redirected to the sign-in page |
@@ -150,12 +153,12 @@
 
 | # | Given | When | Then |
 |---|-------|------|------|
-| AC-18-1 | An application exists | The page renders | The artifacts section is shown as a collapsed panel with the header "Artifacts (X/Y completed)" |
+| AC-18-1 | An application exists | The page renders | The artifacts section is shown as a collapsed panel with the header "Show artifacts (X/Y completed)" |
 | AC-18-2 | The page first renders a card | — | The artifacts panel is collapsed by default |
-| AC-18-3 | The application has no completed artifacts | The page renders | The header reads "Artifacts (0/N completed)" |
-| AC-18-4 | All artifacts are completed | The page renders | The header reads "Artifacts (N/N completed)" |
-| AC-18-5 | I click the artifacts panel header | The panel is collapsed | The panel expands to reveal one row per artifact, each with a checkbox and label |
-| AC-18-6 | I click the artifacts panel header | The panel is expanded | The panel collapses and the individual artifact rows are hidden |
+| AC-18-3 | The application has no completed artifacts | The page renders | The header reads "Show artifacts (0/N completed)" |
+| AC-18-4 | All artifacts are completed | The page renders | The header reads "Show artifacts (N/N completed)" |
+| AC-18-5 | I click the artifacts panel header | The panel is collapsed | The panel expands to reveal one row per artifact, each with a checkbox and label; the header now reads "Hide artifacts (X/Y completed)" |
+| AC-18-6 | I click the artifacts panel header | The panel is expanded | The panel collapses and the individual artifact rows are hidden; the header reverts to "Show artifacts (X/Y completed)" |
 | AC-18-7 | The panel is expanded | I check an uncompleted artifact | The artifact is marked as completed, the checkbox becomes checked, and the completed count in the header increments immediately |
 | AC-18-8 | The panel is expanded | I uncheck a completed artifact | The artifact is marked as not completed, the checkbox becomes unchecked, and the completed count decrements immediately |
 | AC-18-9 | The panel is expanded and I check or uncheck an artifact | The action completes | The change is persisted to the server without a full page reload |
@@ -188,23 +191,25 @@
 | FR-APPS-04 | The `status` field must be constrained to exactly two values: `NOT_SUBMITTED` (default) and `SUBMITTED`. |
 | FR-APPS-05 | The UI must derive the urgency colour band from the `dueDate` at render time using the client's local date — no separate field is stored for urgency. |
 | FR-APPS-06 | The API endpoint for listing applications must return HTTP 401 if the request has no valid session. |
-| FR-APPS-07 | A `+ Add an application` button must be present in the top-left of the page header and navigate to the add-application flow when activated. |
+| FR-APPS-07 | An add-application button must be present in the top-left of the page header and navigate to the add-application flow when activated. On viewports wider than 480 px the button reads `+ Add an application`; on viewports 480 px wide and narrower it collapses to a single `+` character. The button must carry `aria-label="Add an application"` at all viewport widths. |
 | FR-APPS-08 | When a user has no applications, the page must display an empty state rather than a blank or broken layout. |
 | FR-APPS-10 | The due date display must append a days-remaining suffix for future dates (e.g. "(17 days away)"), show "(Today)" when the due date is today, and show the date alone when the due date is in the past. |
 | FR-APPS-11 | The "show more" control on job descriptions must only appear when the description content actually overflows 6 lines — it must not render when the full description fits within 6 lines. |
 | FR-APPS-19 | If an application has salary data, the card must display it with the currency symbol before each amount and the currency code after. The format depends on which values are present: both min and max → `[symbol][min]–[symbol][max] [code]`; min only → `[symbol][min]+ [code]`; max only → `up to [symbol][max] [code]`. If neither salary value is present, no salary line is rendered. The currency symbol must reflect the stored currency code (e.g. $ for CAD/USD, € for EUR, £ for GBP, $ for AUD, ¥ for JPY). |
 | FR-APPS-12 | Each application card must expose a kebab (`⋮`) menu with three actions: Update Status, Edit Application, and Delete Application. |
-| FR-APPS-13 | The Update Status action must toggle the application's status between `NOT_SUBMITTED` and `SUBMITTED` with a single click and no confirmation prompt. The label must show the target status, not the current one. |
+| FR-APPS-13 | The Update Status action must toggle the application's status between `NOT_SUBMITTED` and `SUBMITTED` with a single click and no confirmation prompt. The label must show the target status, not the current one. After a successful toggle, an `aria-live="polite"` region must announce the result to screen readers (e.g. "Software Engineer at Acme marked as Submitted."). |
 | FR-APPS-14 | The Edit Application action must navigate to a pre-filled edit form at `/applications/:id/edit`; on save the user returns to the list with updated data. |
 | FR-APPS-15 | The Delete Application action must display a confirmation dialog naming the specific application before any data is removed; cancelling must leave the application untouched. |
 | FR-APPS-16 | All mutating operations (status update, edit, delete) must verify the requesting user owns the application — HTTP 403 if not. |
 | FR-APPS-17 | A page-level `⋮` kebab menu must be present in the top-right of the page header; it must contain a "Logout" action that invalidates the session server-side and redirects the user to the sign-in page. |
-| FR-APPS-18 | The authenticated user's email address must be displayed immediately to the left of the page-level `⋮` button in the page header. The email is read from the active session and requires no separate API call. |
+| FR-APPS-18 | On viewports wider than 480 px, the authenticated user's email address must be displayed immediately to the left of the page-level `⋮` button. On viewports 480 px wide and narrower, the email must be hidden to prevent header crowding. The email is read from the active session and requires no separate API call. |
 | FR-APPS-20 | The artifacts section on each application card must be rendered as a collapsible panel, collapsed by default. |
-| FR-APPS-21 | The artifacts panel header must display "Artifacts (X/Y completed)" where X is the number of completed artifacts and Y is the total number of artifacts for that application. |
+| FR-APPS-21 | The artifacts panel toggle must display "Show artifacts (X/Y completed)" when collapsed and "Hide artifacts (X/Y completed)" when expanded, where X is the number of completed artifacts and Y is the total. |
 | FR-APPS-22 | When the artifacts panel is expanded, each artifact must appear as a separate row containing a checkbox and the artifact label. |
 | FR-APPS-23 | Checking or unchecking an artifact must persist the `completed` state to the server immediately, without a full page reload. The completed count in the panel header must update to reflect the new state optimistically, without waiting for the server round-trip. |
 | FR-APPS-24 | The API endpoint for toggling artifact completion must verify that the artifact's parent application belongs to the requesting user — HTTP 403 if not. |
+| FR-APPS-25 | Interactive touch targets (kebab trigger buttons, artifacts panel toggle) must have a minimum hit area of 44 × 44 px to meet mobile usability standards. |
+| FR-APPS-26 | All CSS transitions must be suppressed when the user's operating system has `prefers-reduced-motion` set to `reduce`. |
 
 ---
 

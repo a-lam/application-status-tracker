@@ -1,6 +1,6 @@
 # Non-functional Requirements
 
-> **Last updated:** 2026-03-29
+> **Last updated:** 2026-04-07
 
 These requirements apply across the entire application and are not tied to any single feature.
 
@@ -59,3 +59,16 @@ These requirements apply across the entire application and are not tied to any s
 |---|-------------|
 | NFR-SCALE-01 | The server must be stateless — session state must live in the database, not in process memory, so that multiple instances can run in parallel. |
 | NFR-SCALE-02 | The architecture must support horizontal scaling without code changes (add more Railway instances or increase replicas). |
+
+---
+
+## NFR-A11Y — Accessibility & Mobile
+
+| # | Requirement |
+|---|-------------|
+| NFR-A11Y-01 | All text rendered on coloured backgrounds must meet WCAG AA contrast (minimum 4.5:1 for normal text, 3:1 for large text ≥ 18 pt or bold ≥ 14 pt). |
+| NFR-A11Y-02 | All interactive touch targets must have a minimum hit area of 44 × 44 px. |
+| NFR-A11Y-03 | All CSS transitions and animations must be suppressed when the user's operating system reports `prefers-reduced-motion: reduce`. |
+| NFR-A11Y-04 | The UI must be fully usable on mobile viewports down to 320 px wide without horizontal scrolling or overlapping elements. |
+| NFR-A11Y-05 | Status changes and other non-focus-moving feedback must be announced to screen readers via an `aria-live="polite"` region so that keyboard and AT users receive confirmation of completed actions. |
+| NFR-A11Y-06 | Modal dialogs must be implemented with the native `<dialog>` element and `showModal()` to ensure browser-native focus trapping, top-layer stacking, and Escape-key handling. |
