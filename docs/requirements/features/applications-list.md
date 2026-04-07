@@ -1,6 +1,6 @@
 # Feature: Applications List
 
-> **Last updated:** 2026-04-03
+> **Last updated:** 2026-04-07
 > **Status:** Requirements defined — not yet implemented
 > **Default page:** This is the default destination for all signed-in users. Any unauthenticated visit to the app root redirects to the login page.
 
@@ -59,7 +59,7 @@
 
 | # | Given | When | Then |
 |---|-------|------|------|
-| AC-12-1 | An application exists | The page renders | Each application card displays: Job Title with submission status in parentheses, Employer (below the title, italicised and smaller), Due Date, Salary (if present), Job Description, and Artifacts |
+| AC-12-1 | An application exists | The page renders | Each application card displays: Job Title with submission status in parentheses, Employer (below the title, italicised and smaller), Due Date, Salary (if present), Job Description, and a collapsible Artifacts panel |
 | AC-12-2 | An application has a long job description | The page renders | The description is truncated after 6 lines with a "show more" control that reveals the full text |
 | AC-12-3 | An application has a short job description that fits within 6 lines | The page renders | The full description is shown with no "show more" control visible |
 | AC-12-4 | An application's due date is in the future | The page renders | The due date is displayed as `D Mon YYYY (N days away)`, e.g. "21 May 2026 (50 days away)" |
@@ -142,6 +142,26 @@
 
 ---
 
+### US-18 — Track artifact completion from the list
+
+> As a user, I want to see which artifacts I have completed for each application and mark them off directly from the list so that I can track my progress without navigating away.
+
+**Acceptance criteria:**
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC-18-1 | An application exists | The page renders | The artifacts section is shown as a collapsed panel with the header "Artifacts (X/Y completed)" |
+| AC-18-2 | The page first renders a card | — | The artifacts panel is collapsed by default |
+| AC-18-3 | The application has no completed artifacts | The page renders | The header reads "Artifacts (0/N completed)" |
+| AC-18-4 | All artifacts are completed | The page renders | The header reads "Artifacts (N/N completed)" |
+| AC-18-5 | I click the artifacts panel header | The panel is collapsed | The panel expands to reveal one row per artifact, each with a checkbox and label |
+| AC-18-6 | I click the artifacts panel header | The panel is expanded | The panel collapses and the individual artifact rows are hidden |
+| AC-18-7 | The panel is expanded | I check an uncompleted artifact | The artifact is marked as completed, the checkbox becomes checked, and the completed count in the header increments immediately |
+| AC-18-8 | The panel is expanded | I uncheck a completed artifact | The artifact is marked as not completed, the checkbox becomes unchecked, and the completed count decrements immediately |
+| AC-18-9 | The panel is expanded and I check or uncheck an artifact | The action completes | The change is persisted to the server without a full page reload |
+
+---
+
 ### US-16 — Delete an application
 
 > As a user, I want to delete an application I no longer need to track so that I can keep my list tidy.
@@ -180,6 +200,11 @@
 | FR-APPS-16 | All mutating operations (status update, edit, delete) must verify the requesting user owns the application — HTTP 403 if not. |
 | FR-APPS-17 | A page-level `⋮` kebab menu must be present in the top-right of the page header; it must contain a "Logout" action that invalidates the session server-side and redirects the user to the sign-in page. |
 | FR-APPS-18 | The authenticated user's email address must be displayed immediately to the left of the page-level `⋮` button in the page header. The email is read from the active session and requires no separate API call. |
+| FR-APPS-20 | The artifacts section on each application card must be rendered as a collapsible panel, collapsed by default. |
+| FR-APPS-21 | The artifacts panel header must display "Artifacts (X/Y completed)" where X is the number of completed artifacts and Y is the total number of artifacts for that application. |
+| FR-APPS-22 | When the artifacts panel is expanded, each artifact must appear as a separate row containing a checkbox and the artifact label. |
+| FR-APPS-23 | Checking or unchecking an artifact must persist the `completed` state to the server immediately, without a full page reload. The completed count in the panel header must update to reflect the new state optimistically, without waiting for the server round-trip. |
+| FR-APPS-24 | The API endpoint for toggling artifact completion must verify that the artifact's parent application belongs to the requesting user — HTTP 403 if not. |
 
 ---
 

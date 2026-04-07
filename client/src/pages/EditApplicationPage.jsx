@@ -8,6 +8,7 @@ export default function EditApplicationPage() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState(null);
+  const [artifactObjects, setArtifactObjects] = useState(null);
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -18,6 +19,7 @@ export default function EditApplicationPage() {
     async function load() {
       try {
         const app = await getApplication(id);
+        setArtifactObjects(app.artifacts);
         setFormData({
           employer: app.employer,
           jobTitle: app.jobTitle,
@@ -103,6 +105,7 @@ export default function EditApplicationPage() {
           serverErrors={serverErrors}
           submitting={submitting}
           disablePast={false}
+          artifactObjects={artifactObjects}
         />
       )}
     </div>

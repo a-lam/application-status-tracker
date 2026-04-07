@@ -1,6 +1,6 @@
 # Architecture
 
-> **Last updated:** 2026-04-01
+> **Last updated:** 2026-04-07
 
 ---
 
@@ -35,6 +35,8 @@
 │              │              │  PATCH  /api/applications    │   │
 │              │              │         /:id/status          │   │
 │              │              │  DELETE /api/applications/:id│   │
+│              │              │  PATCH  /api/artifacts/:id   │   │
+│              │              │         /completed           │   │
 │              │              └─────────────────────────────┘   │
 │              │                                                 │
 └──────────────┼──────────────────────────────────────────────────┘
@@ -138,6 +140,7 @@ All models are defined in [server/prisma/schema.prisma](../../server/prisma/sche
 | `id` | `String` | PK, cuid | |
 | `label` | `String` | NOT NULL | e.g. "CV", "Cover Letter" |
 | `order` | `Int` | NOT NULL | Preserves user's insertion order |
+| `completed` | `Boolean` | NOT NULL, default `false` | Whether the user has checked off this artifact on the applications list |
 | `createdAt` | `DateTime` | NOT NULL, default now | |
 | `applicationId` | `String` | FK → `applications.id` CASCADE | |
 | — | — | UNIQUE(`applicationId`, `label`) | Enforces no duplicate artifact labels per application |

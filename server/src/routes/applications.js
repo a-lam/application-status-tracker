@@ -168,6 +168,14 @@ router.patch("/applications/:id", requireAuth, async (req, res) => {
     await tx.application.update({ where: { id }, data: updateData });
 
     if (artifacts !== undefined) {
+      const existing = await tx.artifact.findMany({
+        where: { applicationId: id },
+        select: { label: true, completed: true },
+      });
+      const completedLabels = new Set(
+        existing.filter((a) => a.completed).map((a) => a.label.toLowerCase())
+      );
+
       await tx.artifact.deleteMany({ where: { applicationId: id } });
       if (artifacts.length > 0) {
         await tx.artifact.createMany({
@@ -175,6 +183,7 @@ router.patch("/applications/:id", requireAuth, async (req, res) => {
             label: label.trim(),
             order,
             applicationId: id,
+            completed: completedLabels.has(label.trim().toLowerCase()),
           })),
         });
       }

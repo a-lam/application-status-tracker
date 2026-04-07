@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getApplications, updateApplicationStatus, deleteApplication } from "../lib/api.js";
+import { getApplications, updateApplicationStatus, deleteApplication, updateArtifactCompleted } from "../lib/api.js";
 import { authClient } from "../lib/auth.js";
 import ApplicationList from "../components/applications/ApplicationList.jsx";
 import EmptyState from "../components/applications/EmptyState.jsx";
@@ -42,6 +42,29 @@ export default function ApplicationsListPage() {
     document.addEventListener("pointerdown", handlePointerDown);
     return () => document.removeEventListener("pointerdown", handlePointerDown);
   }, [menuOpen]);
+
+  async function handleArtifactToggle(artifactId, completed) {
+    setApplications((apps) =>
+      apps.map((app) => ({
+        ...app,
+        artifacts: app.artifacts.map((a) =>
+          a.id === artifactId ? { ...a, completed } : a
+        ),
+      }))
+    );
+    try {
+      await updateArtifactCompleted(artifactId, completed);
+    } catch {
+      setApplications((apps) =>
+        apps.map((app) => ({
+          ...app,
+          artifacts: app.artifacts.map((a) =>
+            a.id === artifactId ? { ...a, completed: !completed } : a
+          ),
+        }))
+      );
+    }
+  }
 
   async function handleStatusToggle(id, newStatus) {
     try {
@@ -135,6 +158,7 @@ export default function ApplicationsListPage() {
           applications={applications}
           onStatusToggle={handleStatusToggle}
           onDeleteRequest={handleDeleteRequest}
+          onArtifactToggle={handleArtifactToggle}
         />
       )}
 

@@ -1,6 +1,6 @@
 # Page: Applications List
 
-> **Last updated:** 2026-04-03
+> **Last updated:** 2026-04-07
 > **Feature requirements:** [requirements/features/applications-list.md](../../requirements/features/applications-list.md)
 > **Technical module:** [technical/modules/applications-list-module.md](../../technical/modules/applications-list-module.md)
 
@@ -23,6 +23,7 @@ Users land here after signing in and whenever they return to the app.
 | `ApplicationCard` | Displays one application with urgency colour applied |
 | `KebabMenu` | Three-dot menu on each card; exposes Update Status, Edit, Delete actions |
 | `DeleteConfirmDialog` | Modal prompt shown before a delete is confirmed |
+| `ArtifactsPanel` | Collapsible artifact completion panel rendered inside each `ApplicationCard` |
 | `EmptyState` | Shown when the user has no applications |
 
 ---
@@ -129,7 +130,7 @@ Clicking outside the open menu closes it without taking any action.
 │ │  We are looking for an experienced engineer...   │   │
 │ │  [show more]  ← only shown when text > 6 lines   │   │
 │ │                                                  │   │
-│ │  Artifacts: CV, Cover Letter, Portfolio          │   │
+│ │  ▶ Artifacts (2/3 completed)                    │   │
 │ └──────────────────────────────────────────────────┘   │
 │                                                        │
 │ ┌──────────────────────────────────────────────────┐   │
@@ -142,7 +143,7 @@ Clicking outside the open menu closes it without taking any action.
 │ │  Designing for a platform used by millions...    │   │
 │ │  [show more]  ← only shown when text > 6 lines   │   │
 │ │                                                  │   │
-│ │  Artifacts: CV, Portfolio, References            │   │
+│ │  ▶ Artifacts (0/3 completed)                    │   │
 │ └──────────────────────────────────────────────────┘   │
 │                                                        │
 │ ┌──────────────────────────────────────────────────┐   │
@@ -153,7 +154,7 @@ Clicking outside the open menu closes it without taking any action.
 │ │  Job Description:                                │   │
 │ │  Join our infrastructure team to build...        │   │
 │ │                                                  │   │
-│ │  Artifacts: CV, GitHub profile                   │   │
+│ │  ▶ Artifacts (0/2 completed)                    │   │
 │ └──────────────────────────────────────────────────┘   │
 │                                                        │
 │ ┌──────────────────────────────────────────────────┐   │
@@ -164,12 +165,35 @@ Clicking outside the open menu closes it without taking any action.
 │ │  Job Description:                                │   │
 │ │  A fast-growing SaaS company...                  │   │
 │ │                                                  │   │
-│ │  Artifacts: CV, Cover Letter                     │   │
+│ │  ▶ Artifacts (2/2 completed)                    │   │
 │ └──────────────────────────────────────────────────┘   │
 └────────────────────────────────────────────────────────┘
 ```
 
 > **Note:** Dates shown relative to today (1 Apr 2026) for illustration. Acme Corp (2 days away) = urgent/red. Globex Inc (5 days away) = soon/yellow. Initech (19 days away) = future/green. Umbrella Ltd (past due) = grey, no suffix. Acme Corp shows a full salary range; Globex Inc shows a min-only salary; Initech and Umbrella Ltd have no salary data so no salary line is rendered.
+
+### Artifacts panel — expanded state
+
+```
+│ ┌──────────────────────────────────────────────────┐   │
+│ │  Senior Frontend Engineer (Submitted)        [⋮] │   │
+│ │  Acme Corp        Due: 3 Apr 2026 (2 days away)  │   │
+│ │  $90,000–$120,000 CAD                            │   │
+│ │                                                  │   │
+│ │  Job Description:                                │   │
+│ │  We are looking for an experienced engineer...   │   │
+│ │  [show more]                                     │   │
+│ │                                                  │   │
+│ │  ▼ Artifacts (2/3 completed)                    │   │
+│ │    ☑ CV                                         │   │
+│ │    ☑ Cover Letter                               │   │
+│ │    ☐ Portfolio                                  │   │
+│ └──────────────────────────────────────────────────┘   │
+```
+
+> Clicking the `▼ Artifacts (2/3 completed)` header collapses the panel. Clicking a checkbox immediately updates the checked state and recalculates the count in the header.
+
+---
 
 ### Kebab menu open (example: Not Submitted application)
 
@@ -246,7 +270,17 @@ Each card consistently presents fields in the same order:
 │  [Description text — clamped to 6 lines]          │
 │  [show more]  ← only rendered when text overflows │
 │                                                   │
-│  Artifacts: [Artifacts Required]                  │
+│  ▶ Artifacts (X/Y completed)   ← collapsed        │
+└──────────────────────────────────────────────────┘
+
+Expanded:
+
+┌──────────────────────────────────────────────────┐
+│  ...                                             │
+│  ▼ Artifacts (X/Y completed)   ← expanded        │
+│    ☑ [Artifact label]                            │
+│    ☐ [Artifact label]                            │
+│    ☐ [Artifact label]                            │
 └──────────────────────────────────────────────────┘
 ```
 
@@ -285,3 +319,6 @@ Each card consistently presents fields in the same order:
 - The delete confirmation dialog must use `role="dialog"` with `aria-modal="true"` and an `aria-labelledby` pointing to the dialog heading; focus must be trapped inside while it is open and returned to the triggering element on close
 - The "show more" / "show less" description toggle must have a descriptive `aria-label` and must update `aria-expanded` accordingly
 - The "show more" control must not be rendered at all when the description does not overflow 6 lines — do not render it hidden, as screen readers would still announce it
+- The artifacts panel toggle must use a `<button>` element with `aria-expanded` set to `"true"` or `"false"` reflecting the current panel state, and `aria-controls` pointing to the panel's content element
+- Each artifact checkbox must have an accessible label (either a `<label>` element or `aria-label`) containing the artifact's label text
+- The artifact list container must have `role="list"` and each row must be `role="listitem"` so screen readers announce the structure correctly

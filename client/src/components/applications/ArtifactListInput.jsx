@@ -1,7 +1,7 @@
 import { useState } from "react";
 import ArtifactItem from "./ArtifactItem.jsx";
 
-export default function ArtifactListInput({ artifacts, onChange }) {
+export default function ArtifactListInput({ artifacts, onChange, artifactObjects }) {
   const [inputValue, setInputValue] = useState("");
   const [inlineError, setInlineError] = useState("");
 
@@ -33,17 +33,26 @@ export default function ArtifactListInput({ artifacts, onChange }) {
     onChange(artifacts.filter((_, i) => i !== index));
   }
 
+  function getArtifactObject(label) {
+    if (!artifactObjects) return null;
+    return artifactObjects.find((a) => a.label.toLowerCase() === label.toLowerCase()) ?? null;
+  }
+
   return (
     <div className="artifact-list-input">
       {artifacts.length > 0 && (
         <div className="artifact-list">
-          {artifacts.map((label, i) => (
-            <ArtifactItem
-              key={`${label}-${i}`}
-              label={label}
-              onRemove={() => handleRemove(i)}
-            />
-          ))}
+          {artifacts.map((label, i) => {
+            const obj = getArtifactObject(label);
+            return (
+              <ArtifactItem
+                key={`${label}-${i}`}
+                label={label}
+                onRemove={() => handleRemove(i)}
+                completed={obj ? obj.completed : undefined}
+              />
+            );
+          })}
         </div>
       )}
 

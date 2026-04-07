@@ -11,6 +11,7 @@ export default function ApplicationForm({
   serverErrors = {},
   submitting = false,
   disablePast = true,
+  artifactObjects,
 }) {
   const [validationErrors, setValidationErrors] = useState({});
   const employerRef = useRef(null);
@@ -170,6 +171,7 @@ export default function ApplicationForm({
         <ArtifactListInput
           artifacts={formData.artifacts}
           onChange={(val) => onChange("artifacts", val)}
+          artifactObjects={artifactObjects}
         />
       </div>
 

@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { format, differenceInCalendarDays, startOfDay } from "date-fns";
 import { getUrgencyBand } from "../../lib/getUrgencyBand.js";
 import KebabMenu from "./KebabMenu.jsx";
+import ArtifactsPanel from "./ArtifactsPanel.jsx";
 
 const CURRENCY_SYMBOLS = { CAD: "$", USD: "$", EUR: "€", GBP: "£", AUD: "$", JPY: "¥" };
 
@@ -25,14 +26,13 @@ function formatDueDate(dueDate) {
   return `${dateStr} (${delta} day${delta === 1 ? "" : "s"} away)`;
 }
 
-export default function ApplicationCard({ application, onStatusToggle, onDeleteRequest }) {
+export default function ApplicationCard({ application, onStatusToggle, onDeleteRequest, onArtifactToggle }) {
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
   const descRef = useRef(null);
   const band = getUrgencyBand(application.dueDate);
 
   const hasDescription = !!application.jobDescription?.trim();
-  const hasArtifacts = application.artifacts?.length > 0;
   const statusLabel = application.status === "SUBMITTED" ? "Submitted" : "Not Submitted";
   const salaryDisplay = formatSalary(application.salaryMin, application.salaryMax, application.salaryCurrency);
 
@@ -97,12 +97,11 @@ export default function ApplicationCard({ application, onStatusToggle, onDeleteR
         </div>
       )}
 
-      {hasArtifacts && (
-        <div className="app-card__artifacts">
-          <span className="app-card__artifacts-label">Artifacts: </span>
-          {application.artifacts.map((a) => a.label).join(", ")}
-        </div>
-      )}
+      <ArtifactsPanel
+        applicationId={application.id}
+        artifacts={application.artifacts}
+        onArtifactToggle={onArtifactToggle}
+      />
     </article>
   );
 }

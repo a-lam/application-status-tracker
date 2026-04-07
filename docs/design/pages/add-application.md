@@ -1,6 +1,6 @@
 # Page: Add Application
 
-> **Last updated:** 2026-04-01
+> **Last updated:** 2026-04-07
 > **Feature requirements:** [requirements/features/add-application.md](../../requirements/features/add-application.md)
 > **Technical module:** [technical/modules/add-application-module.md](../../technical/modules/add-application-module.md)
 
@@ -20,8 +20,8 @@ The add application page is where a user records a new job application they want
 | `ApplicationForm` | Field layout and validation orchestration |
 | `DatePickerField` | Calendar widget for due date, min date = today |
 | `SalaryFields` | Currency selector + starting and maximum salary inputs with cross-field validation |
-| `ArtifactListInput` | Add/remove artifact items as a managed list |
-| `ArtifactItem` | Single artifact row with remove button |
+| `ArtifactListInput` | Add/remove artifact items as a managed list; shows read-only completion indicators in edit mode |
+| `ArtifactItem` | Single artifact row with remove button; in edit mode also shows a read-only completion indicator and strikethrough style for completed items |
 
 ---
 
@@ -50,6 +50,13 @@ The add application page is where a user records a new job application they want
 - User types an artifact name and clicks Add or presses Enter — the new artifact is appended to the bottom of the list (directly above the input row); the input clears
 - Adding a duplicate (case-insensitive) shows an inline error and does not add the item
 - Clicking Add on an empty input does nothing
+
+**Edit mode only — artifact completion:**
+
+- Each artifact row shows a read-only completion indicator to the left of the label
+- The indicator reflects the artifact's current `completed` state but cannot be interacted with — completion is managed exclusively from the applications list page
+- Completed artifacts are visually distinguished: the label text is shown with a strikethrough and muted colour
+- The add/remove controls remain active in edit mode so artifacts can still be added or removed
 
 ### Salary section
 
@@ -193,6 +200,34 @@ If the user's session expires while they are filling in this form, they are auto
 │  │ Add an artifact...           │  │  + Add       │  │
 │  └──────────────────────────────┘  └──────────────┘  │
 ```
+
+### Artifacts section in edit mode (with completion state)
+
+```
+│  Artifacts                                             │
+│  ┌──────────────────────────────────────────────────┐ │
+│  │  ● ~~CV~~                                    [×] │ │  ← completed: filled indicator + strikethrough
+│  ├──────────────────────────────────────────────────┤ │
+│  │  ● ~~Cover Letter~~                          [×] │ │  ← completed
+│  ├──────────────────────────────────────────────────┤ │
+│  │  ○ Research Statement                        [×] │ │  ← not completed
+│  ├──────────────────────────────────────────────────┤ │
+│  │  ○ Teaching Philosophy                       [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  ○ Teaching Portfolio                        [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  ○ Letters of Recommendation                 [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  ○ DEI Statement                             [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  ○ Transcript                                [×] │ │
+│  └──────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────┐  ┌──────────────┐  │
+│  │ Add an artifact...           │  │  + Add       │  │
+│  └──────────────────────────────┘  └──────────────┘  │
+```
+
+*(Edit flow only. ● = completed (read-only), ○ = not completed (read-only). The indicator cannot be clicked. The [×] remove button remains active on all rows.)*
 
 ### Validation state (required fields missing)
 

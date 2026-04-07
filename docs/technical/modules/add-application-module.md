@@ -1,6 +1,6 @@
 # Module: Add Application
 
-> **Last updated:** 2026-04-01
+> **Last updated:** 2026-04-07
 > **Feature requirements:** [requirements/features/add-application.md](../../requirements/features/add-application.md)
 > **Design:** [design/pages/add-application.md](../../design/pages/add-application.md)
 > **Entry point:** `+ Add an application` button in `ApplicationsListPage` (see [applications-list-module.md](applications-list-module.md))
@@ -44,6 +44,7 @@ model Artifact {
   id            String      @id @default(cuid())
   label         String
   order         Int
+  completed     Boolean     @default(false)
   createdAt     DateTime    @default(now())
 
   applicationId String
@@ -63,6 +64,7 @@ enum ApplicationStatus {
 - `jobDescription` is now `String?` (nullable) — it is optional per the requirements
 - `artifactsRequired String` is removed entirely; replaced by the `artifacts` relation
 - `Artifact.order` preserves the user's insertion order when the list is rendered
+- `Artifact.completed` tracks whether the user has checked off the artifact on the applications list; defaults to `false` on creation
 - `@@unique([applicationId, label])` enforces the no-duplicate-artifact rule at the database level as a backstop to the client-side check
 - `salaryMin` and `salaryMax` are nullable `Decimal(12,2)` — both are optional; neither implies the other
 - `salaryCurrency` is a nullable `String` storing the ISO 4217 currency code (e.g. `"CAD"`); stored alongside the salary values and treated as optional if both salary fields are null
@@ -103,6 +105,8 @@ Owns the top-level form state and submission lifecycle for creating a new applic
 ### `EditApplicationPage`
 
 Owns the top-level form state and submission lifecycle for editing an existing application. On mount, calls `GET /api/applications/:id` to fetch the existing record and pre-fill all form fields. On successful `PATCH`, redirects to `/applications`. On cancel, navigates back to `/applications` without submitting. Renders the same `ApplicationForm` used by `AddApplicationPage`, passing `disablePast={false}` to `DatePickerField`.
+
+In edit mode the page loads artifacts as full objects (`{ id, label, completed }`) and keeps them in a separate `artifactObjects` state alongside the form's `artifacts` label array. It passes `artifactObjects` to `ApplicationForm` → `ArtifactListInput` so each row can render a read-only completion indicator. Completion state cannot be changed from the edit form.
 
 ### `ApplicationForm`
 
@@ -146,21 +150,30 @@ Behaviour:
 
 ### `ArtifactListInput`
 
-Manages its own internal list state (array of strings). Exposes the current list to `ApplicationForm` via a callback whenever the list changes.
+Manages its own internal list state (array of strings for labels). Exposes the current list to `ApplicationForm` via a callback whenever the list changes.
 
-**Initial state:** the list is pre-populated with the following items (in order): CV, Cover Letter, Research Statement, Teaching Philosophy, Teaching Portfolio, Letters of Recommendation, DEI Statement, Transcript.
+Accepts one optional prop for edit mode:
+- `artifactObjects` — array of `{ id, label, completed }` loaded from the server; when present, each row renders a read-only completion indicator
 
-**Layout:** the current list of `ArtifactItem` components is rendered first; the text input and Add button row sits below the list. New artifacts are appended to the end of the list and therefore appear directly above the input row.
+**Initial state (add mode):** the list is pre-populated with: CV, Cover Letter, Research Statement, Teaching Philosophy, Teaching Portfolio, Letters of Recommendation, DEI Statement, Transcript.
+
+**Initial state (edit mode):** the list is initialised from the fetched application's artifact labels (preserving server order); completion state is read from `artifactObjects`.
+
+**Layout:** the current list of `ArtifactItem` components is rendered first; the text input and Add button row sits below the list.
 
 Internal behaviour:
 - Text input + Add button (also triggered on Enter keypress) rendered below the artifact list
-- On add: trims whitespace, checks for empty string, checks for duplicate (case-insensitive) against current list, appends to end of list and clears input if valid, shows inline error if invalid
+- On add: trims whitespace, checks for empty string, checks for duplicate (case-insensitive), appends to end of list and clears input if valid, shows inline error if invalid
 - On remove: splices the item from the list by index; works identically for pre-populated and user-added items
 - Renders the current list as `ArtifactItem` components above the input row
 
 ### `ArtifactItem`
 
-Renders a single artifact label and a remove (`×`) button. Calls the remove handler provided by `ArtifactListInput` with its index.
+Renders a single artifact row. Always includes a remove (`×`) button. In edit mode (when the `completed` prop is provided), also renders a read-only completion indicator to the left of the label:
+- `completed = false` → indicator shown in an empty/inactive state; label rendered normally
+- `completed = true` → indicator shown in a filled/active state; label rendered with a strikethrough and muted colour
+
+The indicator is purely visual — it carries no `onChange` handler and cannot be interacted with. Calls the remove handler provided by `ArtifactListInput` with its index.
 
 ---
 

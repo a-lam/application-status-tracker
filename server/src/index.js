@@ -16,6 +16,7 @@ import logger from "./lib/logger.js";
 import { getAuth } from "./lib/auth.js";
 import healthRouter from "./routes/health.js";
 import applicationsRouter from "./routes/applications.js";
+import artifactsRouter from "./routes/artifacts.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = path.resolve(__dirname, "../../client/dist");
@@ -63,6 +64,7 @@ app.all("/api/auth/*", toNodeHandler(getAuth()));
 // ── Application routes ────────────────────────────────────────────────────────
 app.use(healthRouter);
 app.use("/api", applicationsRouter);
+app.use("/api", artifactsRouter);
 
 // ── Serve React frontend (production) ────────────────────────────────────────
 if (existsSync(clientDist)) {

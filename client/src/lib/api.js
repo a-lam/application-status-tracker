@@ -63,3 +63,10 @@ export function deleteApplication(id) {
     method: "DELETE",
   });
 }
+
+export function updateArtifactCompleted(id, completed) {
+  return apiFetch(`/api/artifacts/${id}/completed`, {
+    method: "PATCH",
+    body: JSON.stringify({ completed }),
+  });
+}

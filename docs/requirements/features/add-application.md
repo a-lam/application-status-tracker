@@ -1,7 +1,7 @@
 # Feature: Add Application
 
-> **Last updated:** 2026-04-01
-> **Status:** Requirements defined — not yet implemented
+> **Last updated:** 2026-04-07
+> **Status:** Partially implemented — artifact completion toggle in edit form not yet implemented
 > **Entry point:** The `+ Add an application` button on the applications list page (see [US-13](applications-list.md#us-13--add-a-new-application))
 
 ---
@@ -68,6 +68,22 @@
 
 ---
 
+### US-24 — View and toggle artifact completion when editing
+
+> As a user, I want to see and update the completion status of each artifact while editing an application so that I can track which documents are ready without leaving the edit page.
+
+**Acceptance criteria:**
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC-24-1 | I am on the edit application page | The page loads | Each artifact row shows a checkbox reflecting whether that artifact has been marked completed |
+| AC-24-2 | An artifact is not yet completed | I check its checkbox | The artifact is immediately marked as completed — no Save click is required |
+| AC-24-3 | An artifact is completed | I uncheck its checkbox | The artifact is immediately marked as not completed — no Save click is required |
+| AC-24-4 | I toggle an artifact's completion | The toggle is processed | The checkbox updates immediately to the new state |
+| AC-24-5 | I am on the add application page (creating a new application) | I view the artifacts list | No completion checkboxes are shown — completion only applies to existing, saved artifacts |
+
+---
+
 ### US-22 — Build an artifacts list
 
 > As a user, I want to add artifacts as individual items to a list so that each artifact is clearly separated and I can manage them one at a time.
@@ -82,7 +98,7 @@
 | AC-22-4 | The artifacts list has one or more items | I click the remove control on an item | That item is removed from the list; other items are unaffected |
 | AC-22-5 | The artifact input is empty | I click Add | Nothing is added — the list is unchanged |
 | AC-22-6 | I have typed an artifact that already exists in the list | I click Add | The duplicate is not added and an inline message indicates the item already exists |
-| AC-22-7 | I save the application with one or more artifacts | The application appears on the list page | Each artifact is displayed as a distinct item on the application card |
+| AC-22-7 | I save the application with one or more artifacts | The application appears on the list page | Each artifact is shown as a distinct row in the collapsible artifacts panel on the application card |
 | AC-22-8 | The page loads with pre-populated artifacts | I click the remove control on a pre-populated artifact | That artifact is removed from the list just as any user-added artifact would be |
 
 ---
@@ -106,6 +122,10 @@
 | FR-ADDAPP-16 | The currency selector must offer a fixed list of common currencies (e.g. CAD, USD, EUR, GBP, AUD, JPY) and default to CAD when the page loads. The selected currency is stored alongside the salary values. |
 | FR-ADDAPP-17 | Each salary input must provide immediate inline validation feedback on blur and on Save — showing an error state for invalid values (negative or non-numeric) and clearing the error for acceptable values. The form must not be submitted while any salary field contains an invalid value. |
 | FR-ADDAPP-18 | On wide viewports, Starting Salary, Maximum Salary, and Currency must be laid out on a single row. On narrow viewports (mobile), the currency selector must wrap to a second row below the two salary inputs. |
+| FR-ADDAPP-22 | When editing an existing application, each artifact row must show a checkbox reflecting its current `completed` state loaded from the server. |
+| FR-ADDAPP-23 | Checking or unchecking an artifact's completion checkbox must immediately call `PATCH /api/artifacts/:id/completed`; no form Save is required for this action. |
+| FR-ADDAPP-24 | Completed artifacts in the edit form must be visually distinct from incomplete ones (e.g. strikethrough label and muted style) so the user can see progress at a glance. |
+| FR-ADDAPP-25 | Completion toggles on the edit page and on the applications list page both update the same `completed` field — their behaviour must be consistent. |
 | FR-ADDAPP-06 | Duplicate artifact entries (case-insensitive) must be rejected with an inline error. |
 | FR-ADDAPP-07 | Every new application must be created with a status of `NOT_SUBMITTED` — the status field is not exposed on this form and must be set server-side. Status can only be changed after creation via the applications list page. |
 | FR-ADDAPP-08 | On successful save, the system must persist the application to the database associated with the current user's ID and redirect the user to the applications list page. |

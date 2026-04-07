@@ -1,6 +1,6 @@
 import ApplicationCard from "./ApplicationCard.jsx";
 
-export default function ApplicationList({ applications, onStatusToggle, onDeleteRequest }) {
+export default function ApplicationList({ applications, onStatusToggle, onDeleteRequest, onArtifactToggle }) {
   return (
     <ul className="app-list" aria-label="Applications">
       {applications.map((app) => (
@@ -9,6 +9,7 @@ export default function ApplicationList({ applications, onStatusToggle, onDelete
             application={app}
             onStatusToggle={onStatusToggle}
             onDeleteRequest={onDeleteRequest}
+            onArtifactToggle={onArtifactToggle}
           />
         </li>
       ))}

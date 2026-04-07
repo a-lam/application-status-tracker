@@ -1,6 +1,6 @@
 # Module: Applications List
 
-> **Last updated:** 2026-04-03
+> **Last updated:** 2026-04-07
 > **Feature requirements:** [requirements/features/applications-list.md](../../requirements/features/applications-list.md)
 > **Design:** [design/pages/applications-list.md](../../design/pages/applications-list.md)
 
@@ -19,10 +19,11 @@ The applications list module is responsible for fetching, ordering, and renderin
 ```
 server/src/
 └── routes/
-    └── applications.js        ← GET    /api/applications
-                                  PATCH  /api/applications/:id/status
-                                  PATCH  /api/applications/:id
-                                  DELETE /api/applications/:id
+    ├── applications.js        ← GET    /api/applications
+    │                             PATCH  /api/applications/:id/status
+    │                             PATCH  /api/applications/:id
+    │                             DELETE /api/applications/:id
+    └── artifacts.js           ← PATCH  /api/artifacts/:id/completed
 ```
 
 ### Frontend
@@ -39,6 +40,7 @@ client/src/
         ├── ApplicationList.jsx      ← Renders the ordered list of ApplicationCards
         ├── KebabMenu.jsx            ← Three-dot dropdown per card; exposes Update Status, Edit, Delete
         ├── DeleteConfirmDialog.jsx  ← Modal prompt before a delete is confirmed
+        ├── ArtifactsPanel.jsx       ← Collapsible panel showing per-artifact completion state; rendered inside each ApplicationCard
         └── EmptyState.jsx           ← Shown when the user has no applications
 ```
 
@@ -72,7 +74,7 @@ Renders a single application's fields. Calls `getUrgencyBand(dueDate)` to determ
   - Max only: `up to [symbol][max] [code]` e.g. "up to $120,000 CAD"
   - Currency symbol mapping: CAD → $, USD → $, EUR → €, GBP → £, AUD → $, JPY → ¥
 - "Job Description:" label followed by Job Description text (truncated to 6 lines with "show more" if content overflows)
-- Artifacts Required
+- `ArtifactsPanel` — collapsible artifacts section, collapsed by default
 
 ### `KebabMenu`
 
@@ -83,6 +85,20 @@ Renders a `⋮` button. When clicked, opens a dropdown with three `role="menuite
 3. **Delete Application** — calls `onDeleteRequest(id)` to open `DeleteConfirmDialog`. Does not delete immediately.
 
 Clicking outside the open menu closes it without any side effect.
+
+### `ArtifactsPanel`
+
+Renders the artifact completion section inside `ApplicationCard`. Collapsed by default.
+
+**Header:** always visible, acts as the toggle trigger. Displays `▶ Artifacts (X/Y completed)` when collapsed and `▼ Artifacts (X/Y completed)` when expanded, where X is the count of artifacts whose `completed` field is `true` and Y is the total number of artifacts.
+
+**Expanded state:** each artifact is rendered as its own row containing a `<input type="checkbox">` (checked when `artifact.completed === true`) and the artifact label. Clicking the checkbox calls `onArtifactToggle(artifactId, !artifact.completed)`.
+
+**State:** the open/closed toggle is local component state (`useState`). The `completed` field of each artifact is lifted to `ApplicationsListPage` and updated via the `onArtifactToggle` handler — the same pattern as status toggle. The header count is derived from the current local state rather than re-fetched.
+
+**Optimistic update:** on checkbox interaction, `ApplicationsListPage` updates the artifact's `completed` value in its local application array immediately, then calls `PATCH /api/artifacts/:id/completed`. If the server returns an error, the optimistic change is rolled back.
+
+---
 
 ### `DeleteConfirmDialog`
 
@@ -206,6 +222,23 @@ The job description is clamped to 6 lines using CSS (`-webkit-line-clamp: 6`). A
 5. Subsequent requests to protected routes return HTTP 401 → redirected to /login
 ```
 
+### Artifact Completion Toggle
+
+```
+1. User expands the ArtifactsPanel on a card
+2. User checks (or unchecks) an artifact row
+3. ApplicationsListPage optimistically updates artifact.completed in local state
+   → ArtifactsPanel re-renders with updated checkbox and new header count
+4. ApplicationsListPage calls PATCH /api/artifacts/:id/completed
+   with body: { completed: true | false }
+5. Server validates session and verifies that the artifact's application belongs to the user
+   → 401 if no valid session; 403 if not the owner; 404 if artifact not found
+6a. Server returns 200 with updated artifact → optimistic state is confirmed; no further action
+6b. Server returns an error → ApplicationsListPage rolls back the optimistic update in local state
+```
+
+---
+
 ### Urgency Band Evaluation
 
 ```
@@ -238,12 +271,15 @@ The authoritative Prisma schema for `Application`, `Artifact`, and the `Applicat
 | `PATCH` | `/api/applications/:id/status` | Yes | Toggles the application status between `NOT_SUBMITTED` and `SUBMITTED` |
 | `PATCH` | `/api/applications/:id` | Yes | Updates any editable fields of the application |
 | `DELETE` | `/api/applications/:id` | Yes | Permanently deletes the application and all related artifacts |
+| `PATCH` | `/api/artifacts/:id/completed` | Yes | Sets the `completed` field on a single artifact; body: `{ completed: boolean }` |
 
 > **Additional endpoints:**
 > - `POST /api/applications` — create a new application (see [add-application-module.md](add-application-module.md))
 > - `GET /api/applications/:id` — fetch a single application for the edit form (see [add-application-module.md](add-application-module.md))
 
 **Ownership check:** All endpoints that access a specific application (`/api/applications/:id*`) must verify that the application's `userId` matches the session user. Return HTTP 403 if not.
+
+For `PATCH /api/artifacts/:id/completed`, the server must look up the artifact's parent application and verify its `userId` matches the session user. Return HTTP 403 if not, HTTP 404 if the artifact does not exist.
 
 ---
 
