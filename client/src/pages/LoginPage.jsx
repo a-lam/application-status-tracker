@@ -1,8 +1,10 @@
 import { useState } from "react";
 import MagicLinkForm from "../components/auth/MagicLinkForm.jsx";
 import ConfirmationMessage from "../components/auth/ConfirmationMessage.jsx";
+import { usePageTitle } from "../hooks/usePageTitle.js";
 
 export default function LoginPage() {
+  usePageTitle("Sign In — Application Status Tracker");
   const [state, setState] = useState("idle"); // idle | sent
   const [sentEmail, setSentEmail] = useState("");
 

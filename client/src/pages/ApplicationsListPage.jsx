@@ -5,8 +5,10 @@ import { authClient } from "../lib/auth.js";
 import ApplicationList from "../components/applications/ApplicationList.jsx";
 import EmptyState from "../components/applications/EmptyState.jsx";
 import DeleteConfirmDialog from "../components/applications/DeleteConfirmDialog.jsx";
+import { usePageTitle } from "../hooks/usePageTitle.js";
 
 export default function ApplicationsListPage() {
+  usePageTitle("Application Status Tracker");
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

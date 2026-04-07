@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { createApplication } from "../lib/api.js";
 import ApplicationForm from "../components/applications/ApplicationForm.jsx";
+import { usePageTitle } from "../hooks/usePageTitle.js";
 
 const DEFAULT_ARTIFACTS = [
   "CV",
@@ -26,6 +27,7 @@ const INITIAL_FORM = {
 };
 
 export default function AddApplicationPage() {
+  usePageTitle("Add Application — Application Status Tracker");
   const [formData, setFormData] = useState(INITIAL_FORM);
   const [submitting, setSubmitting] = useState(false);
   const [serverErrors, setServerErrors] = useState({});

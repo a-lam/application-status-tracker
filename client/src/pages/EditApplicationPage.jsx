@@ -2,8 +2,10 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { getApplication, updateApplication } from "../lib/api.js";
 import ApplicationForm from "../components/applications/ApplicationForm.jsx";
+import { usePageTitle } from "../hooks/usePageTitle.js";
 
 export default function EditApplicationPage() {
+  usePageTitle("Edit Application — Application Status Tracker");
   const { id } = useParams();
   const navigate = useNavigate();
 
