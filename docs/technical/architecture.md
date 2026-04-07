@@ -128,7 +128,7 @@ All models are defined in [server/prisma/schema.prisma](../../server/prisma/sche
 | `salaryMin` | `Decimal(12,2)?` | nullable | Optional starting salary |
 | `salaryMax` | `Decimal(12,2)?` | nullable | Optional maximum salary; must be > `salaryMin` when both are present |
 | `salaryCurrency` | `String?` | nullable | ISO 4217 currency code (e.g. `"CAD"`); stored alongside salary values |
-| `status` | `ApplicationStatus` | NOT NULL, default `NOT_SUBMITTED` | `NOT_SUBMITTED` or `SUBMITTED` — changed only via the list page kebab menu |
+| `status` | `ApplicationStatus` | NOT NULL, default `NOT_SUBMITTED` | One of: `NOT_SUBMITTED`, `SUBMITTED`, `INTERVIEWING`, `OFFER_RECEIVED`, `OFFER_ACCEPTED`, `OFFER_DECLINED`, `REJECTED`, `WITHDRAWN` — changed only via the list page kebab menu |
 | `createdAt` | `DateTime` | NOT NULL, default now | |
 | `updatedAt` | `DateTime` | NOT NULL, auto-update | |
 | `userId` | `String` | FK → `users.id` CASCADE | |

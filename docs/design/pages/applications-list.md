@@ -30,12 +30,16 @@ Users land here after signing in and whenever they return to the app.
 
 ## Application Status
 
-There are exactly two statuses:
-
-| Value | Meaning |
-|-------|---------|
-| `NOT_SUBMITTED` | Application has been created but not yet sent |
-| `SUBMITTED` | Application has been sent to the employer |
+| Value | Display label | Meaning |
+|-------|--------------|---------|
+| `NOT_SUBMITTED` | Not Submitted | Application has been created but not yet sent |
+| `SUBMITTED` | Submitted | Application has been sent to the employer |
+| `INTERVIEWING` | Interviewing | Actively in the interview process |
+| `OFFER_RECEIVED` | Offer Received | An offer has been received, pending decision |
+| `OFFER_ACCEPTED` | Offer Accepted | The offer has been accepted |
+| `OFFER_DECLINED` | Offer Declined | The offer has been declined |
+| `REJECTED` | Rejected | A rejection has been received |
+| `WITHDRAWN` | Withdrawn | The application has been withdrawn |
 
 Status is displayed inline in the job title line as plain text in parentheses — not as a badge or chip. New applications default to `NOT_SUBMITTED`.
 
@@ -43,14 +47,17 @@ Status is displayed inline in the job title line as plain text in parentheses �
 
 ## Colour Coding
 
-The background colour of each `ApplicationCard` is determined solely by how far away the due date is from today, evaluated at page load.
+The background colour of each `ApplicationCard` is determined by **status first, deadline second**, evaluated at page load.
 
-| Urgency band | Condition | Background |
+| Status group | Deadline condition | Background |
 |---|---|---|
-| Past | Today is the day after the due date or later (today > due date) | Light grey (`#f0f0f0`) |
-| Urgent | Due date is today or within the next 3 days (due today is not past due) | Light red (`#fde8e8`) |
-| Soon | Due in 4 – 7 days | Light yellow (`#fef9c3`) |
-| Future | Due in 8+ days | Light green (`#dcfce7`) |
+| `REJECTED`, `WITHDRAWN`, `OFFER_DECLINED` | Any | Light grey (`#f0f0f0`) — resolved unfavourably; no action warranted |
+| `NOT_SUBMITTED` | Past (today > due date) | Light red (`#fde8e8`) — missed the window to submit |
+| `NOT_SUBMITTED` | 0–3 days away | Light yellow (`#fef9c3`) — submit soon |
+| `NOT_SUBMITTED` | 4+ days away | Light green (`#dcfce7`) — plenty of time |
+| `SUBMITTED`, `INTERVIEWING`, `OFFER_RECEIVED`, `OFFER_ACCEPTED` | Any | Light green (`#dcfce7`) — active in the pipeline |
+
+Cards with status `OFFER_ACCEPTED` additionally render with a **bold black border** (thicker than the default card border) to visually distinguish them from all other cards at a glance.
 
 All cards scope the CSS custom property `--text-3` to `#4b5563` (darker than the global value of `#6b7280`). This ensures secondary text elements — employer name, description label, status text, artifacts arrow — achieve a contrast ratio of at least 4.5:1 against every urgency-band background, meeting WCAG AA.
 
@@ -92,11 +99,10 @@ The page header contains the authenticated user's email address (hidden on mobil
 
 Each card has a `⋮` (three-dot vertical) icon in the top-right corner. Clicking it opens a small dropdown menu with three options:
 
-1. **Update Status — [target status]**
-   - If the application is currently `NOT_SUBMITTED`, the label reads "Update Status — Submitted"
-   - If the application is currently `SUBMITTED`, the label reads "Update Status — Not Submitted"
-   - Clicking immediately toggles the status (no confirmation required) and closes the menu; the card title line updates in place
-   - A screen-reader announcement confirms the result (e.g. "Software Engineer at Acme marked as Submitted.")
+1. **Update Status ▶**
+   - Hovering or clicking reveals a submenu listing all 7 statuses that are not the application's current status
+   - Selecting a status immediately updates the application (no confirmation required) and closes both menus; the card title line updates in place
+   - A screen-reader announcement confirms the result (e.g. "Software Engineer at Acme marked as Interviewing.")
 
 2. **Edit Application**
    - Navigates to `/applications/:id/edit`
@@ -125,8 +131,8 @@ Clicking outside the open menu closes it without taking any action.
 ├────────────────────────────────────────────────────────┤
 │ ┌──────────────────────────────────────────────────┐   │
 │ │ bgcolor: light red                               │   │
-│ │  Senior Frontend Engineer (Submitted)        [⋮] │   │
-│ │  Acme Corp        Due: 3 Apr 2026 (2 days away)  │   │
+│ │  Senior Frontend Engineer (Not Submitted)    [⋮] │   │
+│ │  Acme Corp              Due: 29 Mar 2026          │   │
 │ │  $90,000–$120,000 CAD                            │   │
 │ │                                                  │   │
 │ │  Job Description:                                │   │
@@ -139,7 +145,7 @@ Clicking outside the open menu closes it without taking any action.
 │ ┌──────────────────────────────────────────────────┐   │
 │ │ bgcolor: light yellow                            │   │
 │ │  Product Designer (Not Submitted)            [⋮] │   │
-│ │  Globex Inc       Due: 6 Apr 2026 (5 days away)  │   │
+│ │  Globex Inc       Due: 3 Apr 2026 (2 days away)  │   │
 │ │  $70,000+ CAD                                    │   │
 │ │                                                  │   │
 │ │  Job Description:                                │   │
@@ -162,7 +168,7 @@ Clicking outside the open menu closes it without taking any action.
 │                                                        │
 │ ┌──────────────────────────────────────────────────┐   │
 │ │ bgcolor: light grey                              │   │
-│ │  Full Stack Developer (Submitted)            [⋮] │   │
+│ │  Full Stack Developer (Withdrawn)            [⋮] │   │
 │ │  Umbrella Ltd          Due: 10 Mar 2026           │   │
 │ │                                                  │   │
 │ │  Job Description:                                │   │
@@ -173,7 +179,7 @@ Clicking outside the open menu closes it without taking any action.
 └────────────────────────────────────────────────────────┘
 ```
 
-> **Note:** Dates shown relative to today (1 Apr 2026) for illustration. Acme Corp (2 days away) = urgent/red. Globex Inc (5 days away) = soon/yellow. Initech (19 days away) = future/green. Umbrella Ltd (past due) = grey, no suffix. Acme Corp shows a full salary range; Globex Inc shows a min-only salary; Initech and Umbrella Ltd have no salary data so no salary line is rendered.
+> **Note:** Dates shown relative to today (1 Apr 2026) for illustration. Acme Corp (Not Submitted, past due) = red — the deadline has passed and the application was never submitted. Globex Inc (Not Submitted, 2 days away) = yellow — deadline is within 3 days; submit soon. Initech (Not Submitted, 19 days away) = green — plenty of time. Umbrella Ltd (Withdrawn) = grey — resolved unfavourably; no further action warranted. Acme Corp shows a full salary range; Globex Inc shows a min-only salary; Initech and Umbrella Ltd have no salary data so no salary line is rendered.
 
 ### Populated list — mobile (≤ 480 px)
 
@@ -228,11 +234,27 @@ Clicking outside the open menu closes it without taking any action.
 │ ┌──────────────────────────────────────────────────┐   │
 │ │  Product Designer (Not Submitted)        [⋮] ←  │   │
 │ │  Globex Inc   Due: 6 Apr 2026 (5 days away)  │   │   │
-│ │                                          ┌───────┤   │
-│ │                          Update Status — │Submitted   │
-│ │                          Edit Application│       │   │
-│ │                          Delete Applicat.│       │   │
-│ │                                          └───────┘   │
+│ │                                    ┌────────────┤   │
+│ │                      Update Status ▶            │   │
+│ │                      Edit Application           │   │
+│ │                      Delete Application         │   │
+│ │                                    └────────────┘   │
+│ └──────────────────────────────────────────────────┘   │
+
+### Status submenu open
+
+│ ┌──────────────────────────────────────────────────┐   │
+│ │  Product Designer (Not Submitted)        [⋮] ←  │   │
+│ │  Globex Inc   Due: 6 Apr 2026 (5 days away)  │   │   │
+│ │                          ┌─────────────┬─────────┤   │
+│ │            Update Status ▶  Submitted  │         │   │
+│ │            Edit Applicati│  Interviewing         │   │
+│ │            Delete Applic.│  Offer Received       │   │
+│ │                          │  Offer Accepted       │   │
+│ │                          │  Offer Declined       │   │
+│ │                          │  Rejected             │   │
+│ │                          │  Withdrawn │          │   │
+│ │                          └────────────┘          │   │
 │ └──────────────────────────────────────────────────┘   │
 ```
 
@@ -312,8 +334,9 @@ Expanded:
 ```
 
 **Status display:**
-- Rendered inline with the job title: `Job Title (Submitted)` or `Job Title (Not Submitted)`
+- Rendered inline with the job title, e.g. `Job Title (Submitted)`, `Job Title (Interviewing)`, `Job Title (Rejected)`
 - Plain text — no badge, chip, or colour applied to the status text itself
+- Full enum-to-label mapping: see [Application Status](#application-status) table above
 
 **Date string format:**
 - Past due: `D Mon YYYY` — e.g. "10 Mar 2026"
@@ -343,7 +366,7 @@ Expanded:
 - The page-level `⋮` button must have `aria-label="Page options"` and must manage `aria-expanded` and `aria-haspopup="menu"`; clicking outside must close the menu without taking any action
 - The per-card kebab `⋮` button must have an `aria-label` identifying the application (e.g. "Options for Senior Frontend Engineer at Acme Corp") and must manage `aria-expanded` and `aria-haspopup="menu"`
 - Each menu item inside the kebab dropdown must be a `role="menuitem"` element; the dropdown itself must be `role="menu"`
-- After a successful status toggle, a visually-hidden `aria-live="polite" role="status"` region is updated with a confirmation string (e.g. "Software Engineer at Acme marked as Submitted.") so screen readers announce the outcome without moving focus
+- After a successful status update, a visually-hidden `aria-live="polite" role="status"` region is updated with a confirmation string (e.g. "Software Engineer at Acme marked as Interviewing.") so screen readers announce the outcome without moving focus
 - The delete confirmation dialog is implemented using a native `<dialog>` element with `showModal()`. The browser provides top-layer stacking, automatic focus trapping, and Escape-key handling. The dialog carries `aria-labelledby` pointing to its heading. On close, focus returns to the element that triggered the dialog
 - The "show more" / "show less" description toggle must have a descriptive `aria-label` and must update `aria-expanded` accordingly
 - The "show more" control must not be rendered at all when the description does not overflow 6 lines — do not render it hidden, as screen readers would still announce it

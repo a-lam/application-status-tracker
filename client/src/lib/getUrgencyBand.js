@@ -1,25 +1,32 @@
 import { differenceInCalendarDays, startOfDay } from "date-fns";
 
+const GREY_STATUSES = ["REJECTED", "WITHDRAWN", "OFFER_DECLINED"];
+
 /**
- * Returns the urgency band for an application based on its due date.
- * Uses the client's local date — the threshold flip happens at local midnight.
+ * Returns the urgency band for an application based on its status and due date.
+ * Status takes priority over deadline. Uses the client's local date.
  *
- * delta = dueDate (start of day) − today (start of day), in whole calendar days
- *   delta ≤ -1  → 'past'    (due date was yesterday or earlier)
- *   delta 0–3   → 'urgent'  (due today through 3 days from now)
- *   delta 4–7   → 'soon'
- *   delta ≥ 8   → 'future'
+ * 1. REJECTED, WITHDRAWN, OFFER_DECLINED → 'past' (grey) — resolved unfavourably
+ * 2. Any status other than NOT_SUBMITTED  → 'future' (green) — active in the pipeline
+ * 3. NOT_SUBMITTED — deadline-driven:
+ *      delta ≤ -1  → 'urgent' (red)    — past the deadline, still not submitted
+ *      delta 0–3   → 'soon'   (yellow) — submit within 3 days
+ *      delta ≥ 4   → 'future' (green)  — plenty of time
  *
  * @param {string|Date} dueDate
+ * @param {string} status
  * @returns {'past'|'urgent'|'soon'|'future'}
  */
-export function getUrgencyBand(dueDate) {
+export function getUrgencyBand(dueDate, status) {
+  if (GREY_STATUSES.includes(status)) return "past";
+
+  if (status !== "NOT_SUBMITTED") return "future";
+
   const today = startOfDay(new Date());
   const due = startOfDay(new Date(dueDate));
   const delta = differenceInCalendarDays(due, today);
 
-  if (delta <= -1) return "past";
-  if (delta <= 3) return "urgent";
-  if (delta <= 7) return "soon";
+  if (delta <= -1) return "urgent";
+  if (delta <= 3) return "soon";
   return "future";
 }

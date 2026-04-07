@@ -26,14 +26,25 @@ function formatDueDate(dueDate) {
   return `${dateStr} (${delta} day${delta === 1 ? "" : "s"} away)`;
 }
 
-export default function ApplicationCard({ application, onStatusToggle, onDeleteRequest, onArtifactToggle }) {
+const STATUS_LABELS = {
+  NOT_SUBMITTED: "Not Submitted",
+  SUBMITTED: "Submitted",
+  INTERVIEWING: "Interviewing",
+  OFFER_RECEIVED: "Offer Received",
+  OFFER_ACCEPTED: "Offer Accepted",
+  OFFER_DECLINED: "Offer Declined",
+  REJECTED: "Rejected",
+  WITHDRAWN: "Withdrawn",
+};
+
+export default function ApplicationCard({ application, onStatusUpdate, onDeleteRequest, onArtifactToggle }) {
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
   const descRef = useRef(null);
-  const band = getUrgencyBand(application.dueDate);
+  const band = getUrgencyBand(application.dueDate, application.status);
 
   const hasDescription = !!application.jobDescription?.trim();
-  const statusLabel = application.status === "SUBMITTED" ? "Submitted" : "Not Submitted";
+  const statusLabel = STATUS_LABELS[application.status] ?? application.status;
   const salaryDisplay = formatSalary(application.salaryMin, application.salaryMax, application.salaryCurrency);
 
   useEffect(() => {
@@ -50,7 +61,7 @@ export default function ApplicationCard({ application, onStatusToggle, onDeleteR
 
   return (
     <article
-      className={`app-card card--${band}`}
+      className={`app-card card--${band}${application.status === "OFFER_ACCEPTED" ? " app-card--offer-accepted" : ""}`}
       aria-label={`Application: ${application.jobTitle} at ${application.employer}`}
     >
       <div className="app-card__row1">
@@ -60,7 +71,7 @@ export default function ApplicationCard({ application, onStatusToggle, onDeleteR
         </span>
         <KebabMenu
           application={application}
-          onStatusToggle={onStatusToggle}
+          onStatusUpdate={onStatusUpdate}
           onDeleteRequest={onDeleteRequest}
         />
       </div>

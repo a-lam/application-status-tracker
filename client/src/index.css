@@ -449,6 +449,10 @@ body {
   box-shadow: var(--s-md);
 }
 
+.app-card--offer-accepted {
+  border: 3px solid #000;
+}
+
 .app-card__row1 {
   display: flex;
   justify-content: space-between;
@@ -715,6 +719,19 @@ body {
 .kebab-menu__item:focus-visible { outline: none; background: #f3f4f6; }
 .kebab-menu__item--danger { color: var(--danger); }
 .kebab-menu__item--danger:hover { background: #fef2f2; }
+
+.kebab-menu__submenu {
+  list-style: none;
+  padding: 0.2rem 0;
+  margin: 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.kebab-menu__item--sub {
+  padding-left: 1.5rem;
+  font-size: 0.875rem;
+}
 
 /* ── Modal dialog (native <dialog>) ────────────────────────────────────────── */
 .dialog {

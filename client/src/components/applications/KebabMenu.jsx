@@ -1,18 +1,25 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { STATUS_TRANSITIONS, STATUS_LABELS, isTerminal } from "../../lib/statusTransitions.js";
 
-export default function KebabMenu({ application, onStatusToggle, onDeleteRequest }) {
+export default function KebabMenu({ application, onStatusUpdate, onDeleteRequest }) {
   const [open, setOpen] = useState(false);
+  const [subOpen, setSubOpen] = useState(false);
   const menuRef = useRef(null);
   const triggerRef = useRef(null);
   const navigate = useNavigate();
 
-  const isSubmitted = application.status === "SUBMITTED";
-  const targetStatus = isSubmitted ? "NOT_SUBMITTED" : "SUBMITTED";
-  const targetLabel = isSubmitted ? "Not Submitted" : "Submitted";
+  const terminal = isTerminal(application.status);
+  const nextStatuses = (STATUS_TRANSITIONS[application.status] ?? []).map((value) => ({
+    value,
+    label: terminal ? "Reset to Not Submitted" : STATUS_LABELS[value],
+  }));
 
   useEffect(() => {
-    if (!open) return;
+    if (!open) {
+      setSubOpen(false);
+      return;
+    }
     function handlePointerDown(e) {
       if (menuRef.current && !menuRef.current.contains(e.target)) {
         setOpen(false);
@@ -54,14 +61,32 @@ export default function KebabMenu({ application, onStatusToggle, onDeleteRequest
             <button
               type="button"
               role="menuitem"
-              className="kebab-menu__item"
-              onClick={() => {
-                setOpen(false);
-                onStatusToggle(application.id, targetStatus);
-              }}
+              className="kebab-menu__item kebab-menu__item--has-sub"
+              aria-haspopup="menu"
+              aria-expanded={subOpen}
+              onClick={() => setSubOpen((v) => !v)}
             >
-              Update Status — {targetLabel}
+              Update Status ▶
             </button>
+            {subOpen && (
+              <ul className="kebab-menu__submenu" role="menu">
+                {nextStatuses.map(({ value, label }) => (
+                  <li key={value} role="none">
+                    <button
+                      type="button"
+                      role="menuitem"
+                      className="kebab-menu__item kebab-menu__item--sub"
+                      onClick={() => {
+                        setOpen(false);
+                        onStatusUpdate(application.id, value);
+                      }}
+                    >
+                      {label}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            )}
           </li>
           <li role="none">
             <button

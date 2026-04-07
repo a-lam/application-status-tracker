@@ -1,6 +1,7 @@
 import { Router } from "express";
 import prisma from "../lib/prisma.js";
 import { requireAuth } from "../lib/auth.js";
+import { STATUS_TRANSITIONS } from "../lib/statusTransitions.js";
 
 const router = Router();
 
@@ -98,13 +99,19 @@ router.patch("/applications/:id/status", requireAuth, async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
 
-  if (!["NOT_SUBMITTED", "SUBMITTED"].includes(status)) {
+  const VALID_STATUSES = ["NOT_SUBMITTED", "SUBMITTED", "INTERVIEWING", "OFFER_RECEIVED", "OFFER_ACCEPTED", "OFFER_DECLINED", "REJECTED", "WITHDRAWN"];
+  if (!VALID_STATUSES.includes(status)) {
     return res.status(422).json({ error: "Invalid status." });
   }
 
   const existing = await prisma.application.findUnique({ where: { id } });
   if (!existing) return res.status(404).json({ error: "Not found." });
   if (existing.userId !== req.user.id) return res.status(403).json({ error: "Forbidden." });
+
+  const allowed = STATUS_TRANSITIONS[existing.status] ?? [];
+  if (!allowed.includes(status)) {
+    return res.status(422).json({ error: "Invalid status transition." });
+  }
 
   const updated = await prisma.application.update({
     where: { id },

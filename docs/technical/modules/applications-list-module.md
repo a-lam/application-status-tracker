@@ -8,7 +8,7 @@
 
 ## Overview
 
-The applications list module is responsible for fetching, ordering, and rendering all job applications belonging to the authenticated user. It covers read (list), status toggle, edit navigation, and delete — all from the same page.
+The applications list module is responsible for fetching, ordering, and rendering all job applications belonging to the authenticated user. It covers read (list), status update, edit navigation, and delete — all from the same page.
 
 ---
 
@@ -46,16 +46,16 @@ client/src/
 
 ### `ApplicationsListPage`
 
-Owns the data-fetching lifecycle and all mutation handlers (status toggle, delete). On mount, calls `GET /api/applications`. Passes the result array down to `ApplicationList`, or renders `EmptyState` if the array is empty.
+Owns the data-fetching lifecycle and all mutation handlers (status update, delete). On mount, calls `GET /api/applications`. Passes the result array down to `ApplicationList`, or renders `EmptyState` if the array is empty.
 
 Renders three fixed controls in the page header:
 - **Add-application button** — a `<Link>` styled as a primary button on the left; navigates to `/applications/new`. Carries `aria-label="Add an application"` at all viewports. At viewports wider than 480 px the visible label reads `+ Add an application`; at 480 px and narrower it collapses to `+`. Both text spans are `aria-hidden`; the accessible name comes from the `aria-label` alone.
 - **User email** — the authenticated user's email address, read from the `better-auth` client session (`authClient.useSession()`), displayed as plain text immediately to the left of the page-level kebab button. Hidden at viewports ≤ 480 px to prevent header crowding.
 - **Page-level kebab menu** — a `⋮` button on the right that opens a dropdown with a single "Logout" action. Clicking Logout calls `authClient.signOut()` then navigates to `/login`. The menu closes when the user clicks outside it.
 
-Also renders a visually-hidden `aria-live="polite" role="status"` region. After a successful status toggle, this region is populated with a confirmation string (e.g. "Software Engineer at Acme marked as Submitted.") so screen readers can announce the outcome without requiring focus to move.
+Also renders a visually-hidden `aria-live="polite" role="status"` region. After a successful status update, this region is populated with a confirmation string (e.g. "Software Engineer at Acme marked as Interviewing.") so screen readers can announce the outcome without requiring focus to move.
 
-Passes `onStatusToggle` and `onDeleteRequest` handlers down to `ApplicationCard` via `ApplicationList`.
+Passes `onStatusUpdate` and `onDeleteRequest` handlers down to `ApplicationCard` via `ApplicationList`.
 
 ### `ApplicationList`
 
@@ -63,10 +63,10 @@ Receives a pre-sorted array of application objects (sorted by the API). Maps eac
 
 ### `ApplicationCard`
 
-Renders a single application's fields. Calls `getUrgencyBand(dueDate)` to determine the CSS class and `formatDueDate(dueDate)` for the date string. Renders `KebabMenu` in the top-right of the title row.
+Renders a single application's fields. Calls `getUrgencyBand(dueDate, status)` to determine the CSS class and `formatDueDate(dueDate)` for the date string. Renders `KebabMenu` in the top-right of the title row.
 
 **Fields displayed (in order):**
-- Job Title with status in parentheses: `Job Title (Submitted)` or `Job Title (Not Submitted)` — plain text, no badge
+- Job Title with status in parentheses: e.g. `Job Title (Submitted)`, `Job Title (Interviewing)`, `Job Title (Rejected)` — plain text, no badge; full status label mapping in [requirements/features/applications-list.md — AC-12-8 through AC-12-15](../../requirements/features/applications-list.md)
 - `KebabMenu` (`⋮` button) — top-right of the title row
 - Employer (directly below the title row — italicised, smaller font size)
 - Due Date (formatted with days-remaining suffix — see `formatDueDate` below)
@@ -86,13 +86,24 @@ Renders a single application's fields. Calls `getUrgencyBand(dueDate)` to determ
 
 Renders a `⋮` button. When clicked, opens a dropdown with three `role="menuitem"` entries:
 
-1. **Update Status — [target]** — label shows the *opposite* of the current status (`Submitted` when current is `NOT_SUBMITTED`, `Not Submitted` when current is `SUBMITTED`). Calls `onStatusToggle(id)` and closes the menu.
+1. **Update Status ▶** — opens a submenu listing only the statuses that are valid to transition to from the application's current status, as defined in `STATUS_TRANSITIONS` (see Transition Map below). For terminal states (OFFER_ACCEPTED, OFFER_DECLINED, REJECTED, WITHDRAWN) the submenu shows a single "Reset to Not Submitted" option. Selecting a status calls `onStatusUpdate(id, newStatus)` and closes both menus.
 2. **Edit Application** — navigates to `/applications/:id/edit`. No confirmation required.
 3. **Delete Application** — calls `onDeleteRequest(id)` to open `DeleteConfirmDialog`. Does not delete immediately.
 
 Clicking outside the open menu closes it without any side effect.
 
 The trigger button has a minimum hit area of 44 × 44 px (`min-width` and `min-height`) to meet mobile touch-target requirements.
+
+### Transition Map
+
+The allowed status transitions are defined in two mirrored files — one per package, since there is no shared workspace:
+
+- `client/src/lib/statusTransitions.js` — exports `STATUS_TRANSITIONS` (used by `KebabMenu` to filter the submenu) and `STATUS_LABELS` (used to map enum values to display strings).
+- `server/src/lib/statusTransitions.js` — exports the same `STATUS_TRANSITIONS` object (used by the `PATCH /api/applications/:id/status` route handler to enforce the rules server-side).
+
+The client uses `STATUS_TRANSITIONS[application.status]` to derive the array of `nextStatuses` to render. For terminal states the array contains only `NOT_SUBMITTED`; `KebabMenu` renders that option with the label **"Reset to Not Submitted"** rather than "Not Submitted" to communicate that it is a corrective action.
+
+The server imports `STATUS_TRANSITIONS`, fetches the existing application, and checks `STATUS_TRANSITIONS[existing.status].includes(requestedStatus)` before applying any update. A failing check returns HTTP 422. This makes the server the authoritative enforcer; the UI filtering is a convenience, not a guard.
 
 ### `ArtifactsPanel`
 
@@ -118,25 +129,33 @@ Using `showModal()` gives the dialog browser-native top-layer stacking, automati
 
 Click-outside is detected by comparing the pointer coordinates against the dialog's bounding rect on each click event — if the click lands outside the rect, `onCancel` is called.
 
-### `getUrgencyBand(dueDate)` — pure utility
+### `getUrgencyBand(dueDate, status)` — pure utility
 
 ```
-Input:  ISO date string or Date object
+Input:  dueDate — ISO date string or Date object
+        status  — ApplicationStatus enum value
 Output: 'past' | 'urgent' | 'soon' | 'future'
 
-Logic:
-  delta = dueDate (start of day) − today (start of day), in whole days
+Logic (evaluated top to bottom):
 
-  -- An application is NOT past due on its due date (delta = 0 is urgent, not past)
-  -- An application becomes past due the day after its due date (delta = -1 or less)
+  1. REJECTED, WITHDRAWN, OFFER_DECLINED
+     → 'past'    (light grey)   — resolved unfavourably; no action warranted
 
-  delta ≤ -1         → 'past'     (light grey)
-  0 ≤ delta ≤ 3      → 'urgent'   (light red)   ← delta 0 = due today
-  4 ≤ delta ≤ 7      → 'soon'     (light yellow)
-  delta ≥ 8          → 'future'   (light green)
+  2. Any status other than NOT_SUBMITTED
+     (SUBMITTED, INTERVIEWING, OFFER_RECEIVED, OFFER_ACCEPTED)
+     → 'future'  (light green)  — active in the pipeline; urgency is no longer in the user's hands
+
+  3. NOT_SUBMITTED — deadline-driven:
+     delta = dueDate (start of day) − today (start of day), in whole days
+
+     delta ≤ -1   → 'urgent'   (light red)    — past the deadline, still not submitted
+     delta ≤ 3    → 'soon'     (light yellow)  — submit within 3 days
+     delta ≥ 4    → 'future'   (light green)   — plenty of time
 ```
 
 > **Important:** The band is computed using the **client's local date**, not UTC.
+>
+> **Note on CSS class names:** The return values select existing CSS classes — `'past'` → `.card--past` (grey), `'urgent'` → `.card--urgent` (red), `'soon'` → `.card--soon` (yellow), `'future'` → `.card--future` (green). Their original time-distance names no longer match their new triggers, but the colours and classes are unchanged; no new CSS is needed.
 
 ### `formatDueDate(dueDate)` — pure utility
 
@@ -200,17 +219,21 @@ A `.sr-only` class (position absolute, 1 × 1 px, clipped) is defined globally. 
 7. Page is fully rendered
 ```
 
-### Status Toggle
+### Status Update
 
 ```
 1. User clicks ⋮ on a card → KebabMenu opens
-2. User clicks "Update Status — [target]"
-3. ApplicationsListPage calls PATCH /api/applications/:id/status
-   with body: { status: "SUBMITTED" | "NOT_SUBMITTED" }
-4. Server validates session and ownership → 401/403 if invalid
-5. Server updates the record and returns the updated application
-6. ApplicationsListPage updates the application in local state
-   → KebabMenu closes; card title line re-renders with new status
+2. User hovers or clicks "Update Status ▶" → submenu opens with only the valid
+   next statuses for the current status (derived from STATUS_TRANSITIONS)
+3. User clicks a status option
+4. ApplicationsListPage calls PATCH /api/applications/:id/status
+   with body: { status: "<selected status>" }
+5. Server validates session and ownership → 401/403 if invalid
+6. Server checks that the transition is permitted in STATUS_TRANSITIONS →
+   422 with { "error": "Invalid status transition." } if not allowed
+7. Server updates the record and returns the updated application
+8. ApplicationsListPage updates the application in local state
+   → Both menus close; card title line re-renders with new status
    → aria-live region is populated with a confirmation string
    (no full page reload)
 ```
@@ -275,15 +298,22 @@ A `.sr-only` class (position absolute, 1 × 1 px, clipped) is defined globally. 
 ### Urgency Band Evaluation
 
 ```
-Today's date (local, start of day)
+application.status + today's date (local, start of day)
         │
         ▼
-  getUrgencyBand(application.dueDate)
+  getUrgencyBand(application.dueDate, application.status)
         │
-        ├── delta ≤ -1  → 'past'    → .card--past    (light grey)
-        ├── delta 0–3   → 'urgent'  → .card--urgent  (light red)
-        ├── delta 4–7   → 'soon'    → .card--soon    (light yellow)
-        └── delta ≥ 8   → 'future'  → .card--future  (light green)
+        ├── REJECTED / WITHDRAWN / OFFER_DECLINED
+        │       → 'past'    → .card--past    (light grey)
+        │
+        ├── SUBMITTED / INTERVIEWING / OFFER_RECEIVED / OFFER_ACCEPTED
+        │       → 'future'  → .card--future  (light green)
+        │
+        └── NOT_SUBMITTED — deadline-driven:
+                │
+                ├── delta ≤ -1  → 'urgent'  → .card--urgent  (light red)
+                ├── delta 0–3   → 'soon'    → .card--soon    (light yellow)
+                └── delta ≥ 4   → 'future'  → .card--future  (light green)
 ```
 
 ---
@@ -301,7 +331,7 @@ The authoritative Prisma schema for `Application`, `Artifact`, and the `Applicat
 | Method | Path | Auth required | Description |
 |--------|------|--------------|-------------|
 | `GET` | `/api/applications` | Yes | Returns all applications for the current user, ordered by `dueDate` ASC, with artifacts included |
-| `PATCH` | `/api/applications/:id/status` | Yes | Toggles the application status between `NOT_SUBMITTED` and `SUBMITTED` |
+| `PATCH` | `/api/applications/:id/status` | Yes | Sets the application status to the value provided in the request body (`{ status: ApplicationStatus }`) |
 | `PATCH` | `/api/applications/:id` | Yes | Updates any editable fields of the application |
 | `DELETE` | `/api/applications/:id` | Yes | Permanently deletes the application and all related artifacts |
 | `PATCH` | `/api/artifacts/:id/completed` | Yes | Sets the `completed` field on a single artifact; body: `{ completed: boolean }` |

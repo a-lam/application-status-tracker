@@ -69,17 +69,28 @@ export default function ApplicationsListPage() {
     }
   }
 
-  async function handleStatusToggle(id, newStatus) {
+  const STATUS_LABELS = {
+    NOT_SUBMITTED: "Not Submitted",
+    SUBMITTED: "Submitted",
+    INTERVIEWING: "Interviewing",
+    OFFER_RECEIVED: "Offer Received",
+    OFFER_ACCEPTED: "Offer Accepted",
+    OFFER_DECLINED: "Offer Declined",
+    REJECTED: "Rejected",
+    WITHDRAWN: "Withdrawn",
+  };
+
+  async function handleStatusUpdate(id, newStatus) {
     try {
       const updated = await updateApplicationStatus(id, newStatus);
       setApplications((apps) => apps.map((a) => (a.id === id ? updated : a)));
       const app = applications.find((a) => a.id === id);
-      const label = newStatus === "SUBMITTED" ? "Submitted" : "Not Submitted";
+      const label = STATUS_LABELS[newStatus] ?? newStatus;
       if (app) {
         setStatusAnnouncement(`${app.jobTitle} at ${app.employer} marked as ${label}.`);
       }
     } catch {
-      // status toggle failure is silent; a retry is available via the kebab menu
+      // status update failure is silent; a retry is available via the kebab menu
     }
   }
 
@@ -173,7 +184,7 @@ export default function ApplicationsListPage() {
       {!loading && !error && applications.length > 0 && (
         <ApplicationList
           applications={applications}
-          onStatusToggle={handleStatusToggle}
+          onStatusUpdate={handleStatusUpdate}
           onDeleteRequest={handleDeleteRequest}
           onArtifactToggle={handleArtifactToggle}
         />

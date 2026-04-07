@@ -27,27 +27,32 @@
 
 ### US-11 — Understand urgency at a glance
 
-> As a user, I want applications colour-coded by how soon they are due so that I can quickly identify what needs my attention without reading every date.
+> As a user, I want applications colour-coded by their status and how soon they are due so that I can quickly identify what still needs my attention without reading every card.
 
 **Acceptance criteria:**
 
 | # | Given | When | Then |
 |---|-------|------|------|
-| AC-11-1 | An application's due date is within 3 days (today through day 3) | The page renders | The application container is displayed with a light red background |
-| AC-11-2 | An application's due date is 4 to 7 days away (inclusive) | The page renders | The application container is displayed with a light yellow background |
-| AC-11-3 | An application's due date is 8 or more days away | The page renders | The application container is displayed with a light green background |
-| AC-11-4 | Today is the same day as an application's due date | The page renders | The application container is displayed with a light red background (due today is not past due) |
-| AC-11-4b | Today is the day after an application's due date, or later | The page renders | The application container is displayed with a light grey background |
-| AC-11-5 | An application transitions from one urgency band to another (e.g. crosses the 3-day threshold) | The page is loaded on that day | The colour updates to reflect the new band — no manual action required |
+| AC-11-1 | An application's status is `REJECTED`, `WITHDRAWN`, or `OFFER_DECLINED` | The page renders | The application container is displayed with a light grey background, regardless of due date |
+| AC-11-2 | An application's status is `NOT_SUBMITTED` and its due date is in the past (today > due date) | The page renders | The application container is displayed with a light red background (missed the window to submit) |
+| AC-11-3 | An application's status is `NOT_SUBMITTED` and its due date is today or within the next 3 days (0–3 days away) | The page renders | The application container is displayed with a light yellow background (submit soon) |
+| AC-11-4 | An application's status is `NOT_SUBMITTED` and its due date is 4 or more days away | The page renders | The application container is displayed with a light green background |
+| AC-11-5 | An application's status is `SUBMITTED`, `INTERVIEWING`, `OFFER_RECEIVED`, or `OFFER_ACCEPTED` | The page renders | The application container is displayed with a light green background, regardless of due date |
+| AC-11-6 | An application transitions from one colour band to another (e.g. a `NOT_SUBMITTED` application crosses the 3-day deadline threshold) | The page is loaded on that day | The colour updates to reflect the new band — no manual action required |
+| AC-11-7 | An application's status is `OFFER_ACCEPTED` | The page renders | The application card border is rendered bold and black to visually distinguish it from all other cards |
 
-> **Colour band summary:**
+> **Colour band rules (status takes priority over deadline):**
 >
-> | Due date distance | Condition | Background colour |
-> |-------------------|-----------|-------------------|
-> | Past due | Today is the day after the due date or later (today > due date) | Light grey |
-> | 0 – 3 days | Due date is today through 3 days from now (today ≤ due date ≤ today + 3) | Light red |
-> | 4 – 7 days | Due date is 4 to 7 days from now | Light yellow |
-> | 8+ days | Due date is 8 or more days from now | Light green |
+> | Status | Past (today > due date) | 0–3 days | 4+ days |
+> |--------|-------------------------|----------|---------|
+> | `NOT_SUBMITTED` | Light red | Light yellow | Light green |
+> | `SUBMITTED` | Light green | Light green | Light green |
+> | `INTERVIEWING` | Light green | Light green | Light green |
+> | `OFFER_RECEIVED` | Light green | Light green | Light green |
+> | `OFFER_ACCEPTED` | Light green | Light green | Light green |
+> | `OFFER_DECLINED` | Light grey | Light grey | Light grey |
+> | `REJECTED` | Light grey | Light grey | Light grey |
+> | `WITHDRAWN` | Light grey | Light grey | Light grey |
 
 ---
 
@@ -68,6 +73,12 @@
 | AC-12-7 | An application exists | The page renders | A "Job Description:" label appears directly above the job description text |
 | AC-12-8 | An application's status is `NOT_SUBMITTED` | The page renders | The job title line reads "Job Title (Not Submitted)" |
 | AC-12-9 | An application's status is `SUBMITTED` | The page renders | The job title line reads "Job Title (Submitted)" |
+| AC-12-10 | An application's status is `INTERVIEWING` | The page renders | The job title line reads "Job Title (Interviewing)" |
+| AC-12-11 | An application's status is `OFFER_RECEIVED` | The page renders | The job title line reads "Job Title (Offer Received)" |
+| AC-12-12 | An application's status is `OFFER_ACCEPTED` | The page renders | The job title line reads "Job Title (Offer Accepted)" |
+| AC-12-13 | An application's status is `OFFER_DECLINED` | The page renders | The job title line reads "Job Title (Offer Declined)" |
+| AC-12-14 | An application's status is `REJECTED` | The page renders | The job title line reads "Job Title (Rejected)" |
+| AC-12-15 | An application's status is `WITHDRAWN` | The page renders | The job title line reads "Job Title (Withdrawn)" |
 | AC-12-10 | An application has both a starting salary and a maximum salary | The page renders | The salary range is displayed as `[symbol][min]–[symbol][max] [code]`, e.g. "$80,000–$120,000 CAD" |
 | AC-12-11 | An application has only a starting salary | The page renders | The salary is displayed as `[symbol][min]+ [code]`, e.g. "$80,000+ CAD" |
 | AC-12-12 | An application has only a maximum salary | The page renders | The salary is displayed as `up to [symbol][max] [code]`, e.g. "up to $120,000 CAD" |
@@ -91,21 +102,54 @@
 
 ---
 
-### US-14 — Update submission status from the list
+### US-14 — Update application status from the list
 
-> As a user, I want to toggle an application's status between "Not Submitted" and "Submitted" directly from the list so that I can record progress without leaving the page.
+> As a user, I want to select a new status for an application from a submenu directly from the list so that I can record progress without leaving the page.
 
 **Acceptance criteria:**
 
 | # | Given | When | Then |
 |---|-------|------|------|
 | AC-14-1 | I am on the applications list page | The page renders | Each application card shows a `⋮` (kebab) menu button in its top-right corner |
-| AC-14-2 | I click the `⋮` button on a card | The menu opens | I see three options: "Update Status — [target status]", "Edit Application", and "Delete Application" |
-| AC-14-3 | The application's current status is `NOT_SUBMITTED` | The menu opens | The first option reads "Update Status — Submitted" |
-| AC-14-4 | The application's current status is `SUBMITTED` | The menu opens | The first option reads "Update Status — Not Submitted" |
-| AC-14-5 | I click "Update Status — [target status]" | The action completes | The status is toggled, the menu closes, and the job title line on the card updates to reflect the new status without a full page reload |
-| AC-14-6 | I click "Update Status — [target status]" | The action completes | An announcement is made to screen readers confirming the new status (e.g. "Software Engineer at Acme marked as Submitted.") |
-| AC-14-7 | I click outside an open kebab menu | — | The menu closes and no action is taken |
+| AC-14-2 | I click the `⋮` button on a card | The menu opens | I see three options: "Update Status ▶", "Edit Application", and "Delete Application" |
+| AC-14-3 | The menu is open | I hover or click "Update Status ▶" | A submenu opens listing only the statuses that are valid to transition to from the application's current status (see US-ST for the full transition table) |
+| AC-14-4 | The status submenu is open | I click any status option | The status is updated, both menus close, and the job title line on the card updates to reflect the new status without a full page reload |
+| AC-14-5 | I click outside an open kebab menu or submenu | — | All open menus close and no action is taken |
+| AC-14-6 | I select a new status | The action completes | An announcement is made to screen readers confirming the new status (e.g. "Software Engineer at Acme marked as Interviewing.") |
+
+---
+
+### US-ST — Guided status workflow
+
+> As a user, I want the "Update Status" submenu to show only the statuses I can logically move to from the current state so that I am guided through the workflow and cannot make invalid transitions.
+
+#### Status Transition Table
+
+| Current Status   | Allowed Next Statuses                                     |
+|------------------|-----------------------------------------------------------|
+| NOT_SUBMITTED    | SUBMITTED, WITHDRAWN                                      |
+| SUBMITTED        | INTERVIEWING, REJECTED, WITHDRAWN                         |
+| INTERVIEWING     | OFFER_RECEIVED, REJECTED, WITHDRAWN                       |
+| OFFER_RECEIVED   | OFFER_ACCEPTED, OFFER_DECLINED, WITHDRAWN                 |
+| OFFER_ACCEPTED   | NOT_SUBMITTED _(reset only — terminal state recovery)_    |
+| OFFER_DECLINED   | NOT_SUBMITTED _(reset only — terminal state recovery)_    |
+| REJECTED         | NOT_SUBMITTED _(reset only — terminal state recovery)_    |
+| WITHDRAWN        | NOT_SUBMITTED _(reset only — terminal state recovery)_    |
+
+**Design rationale:**
+- WITHDRAWN is available from all active (non-terminal) states because a candidate can pull out at any point.
+- REJECTED is available from SUBMITTED and INTERVIEWING; it is not available from OFFER_RECEIVED (an offer implies acceptance or decline are the only logical next steps).
+- Terminal states (OFFER_ACCEPTED, OFFER_DECLINED, REJECTED, WITHDRAWN) offer a single "Reset to Not Submitted" option so users can recover from mistakes without losing the application record.
+
+**Acceptance criteria:**
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC-ST-01 | An application is in state S | The "Update Status ▶" submenu opens | Only the statuses listed in the transition table for S are shown |
+| AC-ST-02 | An application is in a terminal state (OFFER_ACCEPTED, OFFER_DECLINED, REJECTED, or WITHDRAWN) | The "Update Status ▶" submenu opens | Only "Reset to Not Submitted" is shown |
+| AC-ST-03 | An application is in state S | A `PATCH /api/applications/:id/status` request is sent with a status not in the allowed set for S | The server responds `422` with `{ "error": "Invalid status transition." }` |
+| AC-ST-04 | An application is in a non-terminal state | The user selects a valid next status from the submenu | The status updates, both menus close, the card title updates in place, and the screen reader announcement fires — same behaviour as today |
+| AC-ST-05 | Any application | The full workflow is exercised | All existing acceptance criteria for US-14 (AC-14-1 through AC-14-6) remain satisfied |
 
 ---
 
@@ -188,8 +232,9 @@
 | FR-APPS-09 | The application root route (`/`) must redirect signed-in users to the applications list page and redirect unauthenticated users to the sign-in page. |
 | FR-APPS-02 | Applications must be returned ordered by `dueDate` ascending (earliest first). |
 | FR-APPS-03 | Each application record must store: `dueDate`, `employer`, `jobTitle`, `jobDescription`, `salaryMin`, `salaryMax`, `salaryCurrency`, `artifacts`, and `status`. |
-| FR-APPS-04 | The `status` field must be constrained to exactly two values: `NOT_SUBMITTED` (default) and `SUBMITTED`. |
-| FR-APPS-05 | The UI must derive the urgency colour band from the `dueDate` at render time using the client's local date — no separate field is stored for urgency. |
+| FR-APPS-04 | The `status` field must be constrained to the following enum values: `NOT_SUBMITTED` (default), `SUBMITTED`, `INTERVIEWING`, `OFFER_RECEIVED`, `OFFER_ACCEPTED`, `OFFER_DECLINED`, `REJECTED`, `WITHDRAWN`. |
+| FR-APPS-05 | The UI must derive the urgency colour band from the application's `status` and `dueDate` at render time using the client's local date — no separate field is stored for urgency. |
+| FR-APPS-27 | When an application's status is `OFFER_ACCEPTED`, the application card must render with a bold, black border to visually distinguish it from all other cards. |
 | FR-APPS-06 | The API endpoint for listing applications must return HTTP 401 if the request has no valid session. |
 | FR-APPS-07 | An add-application button must be present in the top-left of the page header and navigate to the add-application flow when activated. On viewports wider than 480 px the button reads `+ Add an application`; on viewports 480 px wide and narrower it collapses to a single `+` character. The button must carry `aria-label="Add an application"` at all viewport widths. |
 | FR-APPS-08 | When a user has no applications, the page must display an empty state rather than a blank or broken layout. |
@@ -197,7 +242,7 @@
 | FR-APPS-11 | The "show more" control on job descriptions must only appear when the description content actually overflows 6 lines — it must not render when the full description fits within 6 lines. |
 | FR-APPS-19 | If an application has salary data, the card must display it with the currency symbol before each amount and the currency code after. The format depends on which values are present: both min and max → `[symbol][min]–[symbol][max] [code]`; min only → `[symbol][min]+ [code]`; max only → `up to [symbol][max] [code]`. If neither salary value is present, no salary line is rendered. The currency symbol must reflect the stored currency code (e.g. $ for CAD/USD, € for EUR, £ for GBP, $ for AUD, ¥ for JPY). |
 | FR-APPS-12 | Each application card must expose a kebab (`⋮`) menu with three actions: Update Status, Edit Application, and Delete Application. |
-| FR-APPS-13 | The Update Status action must toggle the application's status between `NOT_SUBMITTED` and `SUBMITTED` with a single click and no confirmation prompt. The label must show the target status, not the current one. After a successful toggle, an `aria-live="polite"` region must announce the result to screen readers (e.g. "Software Engineer at Acme marked as Submitted."). |
+| FR-APPS-13 | The "Update Status ▶" item in the kebab menu must open a submenu listing only the statuses that are valid to transition to from the application's current status (see US-ST for the full transition table). For terminal-state applications the submenu shows a single option labelled "Reset to Not Submitted". Selecting a status from the submenu must update the application immediately with no confirmation prompt, close both menus, and update the job title line in place without a full page reload. After a successful status change, an `aria-live="polite"` region must announce the result to screen readers (e.g. "Software Engineer at Acme marked as Interviewing."). The server must enforce the transition rules and return HTTP 422 with `{ "error": "Invalid status transition." }` if the requested transition is not permitted from the application's current status. |
 | FR-APPS-14 | The Edit Application action must navigate to a pre-filled edit form at `/applications/:id/edit`; on save the user returns to the list with updated data. |
 | FR-APPS-15 | The Delete Application action must display a confirmation dialog naming the specific application before any data is removed; cancelling must leave the application untouched. |
 | FR-APPS-16 | All mutating operations (status update, edit, delete) must verify the requesting user owns the application — HTTP 403 if not. |
