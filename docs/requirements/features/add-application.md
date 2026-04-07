@@ -40,6 +40,8 @@
 | AC-21-4 | The calendar widget is open | I click a valid future date or today | The date is selected, the calendar closes, and the selected date appears in the Due Date field |
 | AC-21-5 | I have selected a due date | I click Save | The saved application reflects the exact date I selected |
 
+> **Note — editing behaviour (separate feature):** The past-date restriction above applies to new applications only. When editing an existing application, all dates — including past dates — must be selectable. If the application's current due date is already in the past, the save action must still succeed; the user is not forced to pick a future date. See the edit application feature for full acceptance criteria.
+
 ---
 
 ### US-23 — Enter a salary range
@@ -74,13 +76,14 @@
 
 | # | Given | When | Then |
 |---|-------|------|------|
-| AC-22-1 | I am on the add application page | I view the Artifacts section | I see a text input and an Add button, with an empty list below |
-| AC-22-2 | I have typed an artifact name in the input | I click Add (or press Enter) | The artifact appears as an item in the list and the input is cleared |
+| AC-22-1 | I am on the add application page | I view the Artifacts section | I see a pre-populated list containing: CV, Cover Letter, Research Statement, Teaching Philosophy, Teaching Portfolio, Letters of Recommendation, DEI Statement, and Transcript — with a text input and Add button below the list |
+| AC-22-2 | I have typed an artifact name in the input | I click Add (or press Enter) | The artifact is inserted above the input field (appended to the end of the list) and the input is cleared |
 | AC-22-3 | The artifacts list has one or more items | I view the list | Each item has a remove control (e.g. × button) beside it |
 | AC-22-4 | The artifacts list has one or more items | I click the remove control on an item | That item is removed from the list; other items are unaffected |
 | AC-22-5 | The artifact input is empty | I click Add | Nothing is added — the list is unchanged |
 | AC-22-6 | I have typed an artifact that already exists in the list | I click Add | The duplicate is not added and an inline message indicates the item already exists |
 | AC-22-7 | I save the application with one or more artifacts | The application appears on the list page | Each artifact is displayed as a distinct item on the application card |
+| AC-22-8 | The page loads with pre-populated artifacts | I click the remove control on a pre-populated artifact | That artifact is removed from the list just as any user-added artifact would be |
 
 ---
 
@@ -91,8 +94,11 @@
 | FR-ADDAPP-01 | The add application page must be accessible only to authenticated users; unauthenticated requests must redirect to the sign-in page. |
 | FR-ADDAPP-02 | The form must require Employer, Job Title, and Due Date before allowing submission. All other fields are optional. |
 | FR-ADDAPP-03 | The Due Date field must be presented as a calendar date picker — free-text date entry is not permitted. |
-| FR-ADDAPP-04 | The calendar date picker must disable all dates before today; today itself must be selectable. |
+| FR-ADDAPP-04 | When creating a new application, the calendar date picker must disable all dates before today; today itself must be selectable. This restriction does not apply when editing an existing application. |
+| FR-ADDAPP-21 | When editing an existing application, all dates must be selectable in the date picker, including past dates. If the application's existing due date is already in the past, saving with that past date (or any other past date) must be permitted without error. |
 | FR-ADDAPP-05 | Artifacts must be entered and stored as a discrete ordered list of strings, not as a single text field. |
+| FR-ADDAPP-19 | The Artifacts section must pre-populate with the following items in order: CV, Cover Letter, Research Statement, Teaching Philosophy, Teaching Portfolio, Letters of Recommendation, DEI Statement, Transcript. These defaults are fully editable — any pre-populated item may be removed, and new items may be added. |
+| FR-ADDAPP-20 | The artifact text input and Add button must appear below the artifacts list. Newly added artifacts are appended to the bottom of the list, directly above the input row. |
 | FR-ADDAPP-12 | The form must include an optional Salary section with a Starting Salary field, a Maximum Salary field, and a currency selector. All three are optional as a group. The Salary section must appear above the Job Description field. |
 | FR-ADDAPP-13 | If both starting and maximum salary are provided, starting salary must be strictly less than maximum salary; otherwise the form must reject submission with an inline error. |
 | FR-ADDAPP-14 | If only one salary value is provided (starting or maximum), no cross-field validation is performed — the single value must be accepted without error. |

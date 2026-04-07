@@ -3,7 +3,7 @@ import { DayPicker } from "react-day-picker";
 import { format, parse, isValid } from "date-fns";
 import "react-day-picker/style.css";
 
-export default function DatePickerField({ value, onChange, error, id = "due-date" }) {
+export default function DatePickerField({ value, onChange, error, id = "due-date", disablePast = true }) {
   const [open, setOpen] = useState(false);
 
   const selected = value ? parse(value, "yyyy-MM-dd", new Date()) : undefined;
@@ -58,7 +58,7 @@ export default function DatePickerField({ value, onChange, error, id = "due-date
             mode="single"
             selected={selected}
             onSelect={handleSelect}
-            disabled={{ before: new Date() }}
+            disabled={disablePast ? { before: new Date() } : undefined}
             autoFocus
           />
         </div>

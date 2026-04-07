@@ -66,8 +66,25 @@ app.use("/api", applicationsRouter);
 
 // ── Serve React frontend (production) ────────────────────────────────────────
 if (existsSync(clientDist)) {
-  app.use(express.static(clientDist));
+  // Hashed assets (JS/CSS) get long-term caching; HTML files never cached.
+  app.use(
+    express.static(clientDist, {
+      index: false,
+      setHeaders: (res, filePath) => {
+        if (filePath.endsWith(".html")) {
+          res.setHeader("Cache-Control", "no-cache");
+        } else {
+          res.setHeader(
+            "Cache-Control",
+            "public, max-age=31536000, immutable"
+          );
+        }
+      },
+    })
+  );
+  // SPA fallback — always serves a fresh index.html.
   app.get("*", (_req, res) => {
+    res.setHeader("Cache-Control", "no-cache");
     res.sendFile(path.join(clientDist, "index.html"));
   });
 }

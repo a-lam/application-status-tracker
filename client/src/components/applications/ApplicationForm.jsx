@@ -10,6 +10,7 @@ export default function ApplicationForm({
   onCancel,
   serverErrors = {},
   submitting = false,
+  disablePast = true,
 }) {
   const [validationErrors, setValidationErrors] = useState({});
   const employerRef = useRef(null);
@@ -134,6 +135,7 @@ export default function ApplicationForm({
           value={formData.dueDate}
           onChange={(val) => onChange("dueDate", val)}
           error={errors.dueDate}
+          disablePast={disablePast}
         />
       </div>
 

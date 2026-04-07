@@ -134,10 +134,7 @@ router.patch("/applications/:id", requireAuth, async (req, res) => {
       errors.dueDate = "Due date is required.";
     } else {
       const due = new Date(dueDate);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
       if (isNaN(due.getTime())) errors.dueDate = "Due date is invalid.";
-      else if (due < today) errors.dueDate = "Due date cannot be in the past.";
     }
   }
   if (salaryMin !== undefined || salaryMax !== undefined) {

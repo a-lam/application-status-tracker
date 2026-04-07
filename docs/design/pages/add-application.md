@@ -37,16 +37,17 @@ The add application page is where a user records a new job application they want
 ### Due date picker
 
 - Clicking the Due Date field opens a calendar widget
-- Dates before today are visually greyed out and cannot be clicked
+- **When adding a new application:** dates before today are visually greyed out and cannot be clicked; today is the earliest selectable date
+- **When editing an existing application:** all dates are selectable, including past dates; no dates are greyed out or disabled
+- If an application's due date is already in the past when editing, the user may keep the past date or change it to any date (past or future); saving is always permitted
 - Clicking a valid date selects it, closes the calendar, and shows the formatted date in the field
-- Today's date is a valid selection
 
 ### Artifacts list
 
-- The Artifacts section shows a text input and an Add button, with an empty list area below
-- User types an artifact name (e.g. "CV") and clicks Add or presses Enter
-- The artifact appears as a pill or row in the list below; the input clears
-- Each artifact row has a `×` remove button
+- The Artifacts section loads with a pre-populated list of artifacts: CV, Cover Letter, Research Statement, Teaching Philosophy, Teaching Portfolio, Letters of Recommendation, DEI Statement, Transcript
+- A text input and Add button sit below the list
+- Each artifact row has a `×` remove button; pre-populated items may be removed just like user-added ones
+- User types an artifact name and clicks Add or presses Enter — the new artifact is appended to the bottom of the list (directly above the input row); the input clears
 - Adding a duplicate (case-insensitive) shows an inline error and does not add the item
 - Clicking Add on an empty input does nothing
 
@@ -72,7 +73,7 @@ The add application page is where a user records a new job application they want
 
 ### Session expiry
 
-If the user's session expires while they are filling in this form, they are automatically signed out and redirected to the sign-in page. Any unsaved form data is lost. No action or page reload is required — the client detects expiry and acts immediately.
+If the user's session expires while they are filling in this form, they are automatically signed out and redirected to the sign-in page. Any unsaved form data is lost. No action or page reload is required — the client polls the server periodically and acts immediately when the session is found to be invalid.
 
 ---
 
@@ -116,10 +117,26 @@ If the user's session expires while they are filling in this form, they are auto
 │  └──────────────────────────────────────────────────┘ │
 │                                                        │
 │  Artifacts                                             │
+│  ┌──────────────────────────────────────────────────┐ │
+│  │  CV                                          [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Cover Letter                                [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Research Statement                          [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Teaching Philosophy                         [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Teaching Portfolio                          [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Letters of Recommendation                   [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  DEI Statement                               [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Transcript                                  [×] │ │
+│  └──────────────────────────────────────────────────┘ │
 │  ┌──────────────────────────────┐  ┌──────────────┐  │
 │  │ Add an artifact...           │  │  + Add       │  │
 │  └──────────────────────────────┘  └──────────────┘  │
-│  (no artifacts added yet)                              │
 │                                                        │
 │  ┌────────────────┐   ┌────────────────┐              │
 │  │      Save      │   │     Cancel     │              │
@@ -147,23 +164,34 @@ If the user's session expires while they are filling in this form, they are auto
 │  └──────────────────────────────────────────────────┘ │
 ```
 
-*(Past dates shown in grey, unclickable. Today is highlighted. Future dates are fully interactive.)*
+*(Add flow: past dates shown in grey, unclickable. Today is highlighted. Future dates are fully interactive. Edit flow: no dates are disabled — all are fully interactive.)*
 
 ### Artifacts section (with items added)
 
 ```
 │  Artifacts                                             │
-│  ┌──────────────────────────────┐  ┌──────────────┐  │
-│  │ Add an artifact...           │  │  + Add       │  │
-│  └──────────────────────────────┘  └──────────────┘  │
-│                                                        │
 │  ┌──────────────────────────────────────────────────┐ │
 │  │  CV                                          [×] │ │
 │  ├──────────────────────────────────────────────────┤ │
 │  │  Cover Letter                                [×] │ │
 │  ├──────────────────────────────────────────────────┤ │
-│  │  Portfolio                                   [×] │ │
+│  │  Research Statement                          [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Teaching Philosophy                         [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Teaching Portfolio                          [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Letters of Recommendation                   [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  DEI Statement                               [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Transcript                                  [×] │ │
+│  ├──────────────────────────────────────────────────┤ │
+│  │  Writing Sample                              [×] │ │   ← user-added item appears above input
 │  └──────────────────────────────────────────────────┘ │
+│  ┌──────────────────────────────┐  ┌──────────────┐  │
+│  │ Add an artifact...           │  │  + Add       │  │
+│  └──────────────────────────────┘  └──────────────┘  │
 ```
 
 ### Validation state (required fields missing)

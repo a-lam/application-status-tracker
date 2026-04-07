@@ -200,7 +200,7 @@ The job description is clamped to 6 lines using CSS (`-webkit-line-clamp: 6`). A
 1. User clicks ⋮ in the page header → page-level menu opens
 2. User clicks "Logout"
 3. Client calls authClient.signOut()
-   → better-auth sends DELETE /api/auth/sign-out (session cookie included)
+   → better-auth sends POST /api/auth/sign-out (session cookie included)
    → Server invalidates the session record immediately
 4. Client navigates to /login
 5. Subsequent requests to protected routes return HTTP 401 → redirected to /login
@@ -224,34 +224,7 @@ Today's date (local, start of day)
 
 ## Database Model
 
-The authoritative schema is defined in [server/prisma/schema.prisma](../../server/prisma/schema.prisma). See [add-application-module.md — Schema Change: Artifacts](add-application-module.md#schema-change-artifacts) for the full schema including the `Artifact` model.
-
-```prisma
-model Application {
-  id              String            @id @default(cuid())
-  dueDate         DateTime
-  employer        String
-  jobTitle        String
-  jobDescription  String?
-  salaryMin       Decimal?          @db.Decimal(12, 2)
-  salaryMax       Decimal?          @db.Decimal(12, 2)
-  salaryCurrency  String?
-  status          ApplicationStatus @default(NOT_SUBMITTED)
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-
-  userId          String
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  artifacts       Artifact[]
-
-  @@map("applications")
-}
-
-enum ApplicationStatus {
-  NOT_SUBMITTED
-  SUBMITTED
-}
-```
+The authoritative Prisma schema for `Application`, `Artifact`, and the `ApplicationStatus` enum is defined in [add-application-module.md — Schema Change: Artifacts](add-application-module.md#schema-change-artifacts). Column definitions are summarised in [technical/architecture.md — Data Models](../architecture.md#data-models).
 
 **Relationship:** Many applications → one user. Deleting a user cascades to delete all their applications and artifacts.
 

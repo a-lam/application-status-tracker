@@ -29,7 +29,8 @@
 │   │  better-auth        │   │  Application Routes          │   │
 │   │  /api/auth/*        │   │  GET    /health              │   │
 │   │  (magic link;       │   │  GET    /api/applications    │   │
-│   │  OAuth ready)       │   │  POST   /api/applications    │   │
+│   │  OAuth ready)       │   │  GET    /api/applications/:id│   │
+│   │                     │   │  POST   /api/applications    │   │
 │   └──────────┬──────────┘   │  PATCH  /api/applications/:id│   │
 │              │              │  PATCH  /api/applications    │   │
 │              │              │         /:id/status          │   │

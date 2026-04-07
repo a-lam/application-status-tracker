@@ -85,11 +85,12 @@ server/src/
 ```
 client/src/
 ├── pages/
-│   └── AddApplicationPage.jsx      ← Top-level page, owns form state and submit lifecycle
+│   ├── AddApplicationPage.jsx      ← Top-level page for creating; owns form state and submit lifecycle
+│   └── EditApplicationPage.jsx     ← Top-level page for editing; fetches existing record, pre-fills form
 └── components/
     └── applications/
-        ├── ApplicationForm.jsx      ← Form shell, field layout, validation orchestration
-        ├── DatePickerField.jsx      ← Calendar widget wrapper, enforces min date = today
+        ├── ApplicationForm.jsx      ← Form shell, field layout, validation orchestration (shared by add and edit)
+        ├── DatePickerField.jsx      ← Calendar widget wrapper; disablePast=true for add, false for edit
         ├── SalaryFields.jsx         ← Currency selector + starting/max salary inputs with cross-field validation
         ├── ArtifactListInput.jsx    ← Add/remove artifact items; manages local list state
         └── ArtifactItem.jsx         ← Single artifact row with label and remove button
@@ -97,7 +98,11 @@ client/src/
 
 ### `AddApplicationPage`
 
-Owns the top-level form state and submission lifecycle. On successful `POST`, redirects to `/applications`. On cancel, navigates back to `/applications` without submitting. Renders `ApplicationForm` with handlers passed as props.
+Owns the top-level form state and submission lifecycle for creating a new application. On successful `POST`, redirects to `/applications`. On cancel, navigates back to `/applications` without submitting. Renders `ApplicationForm` with handlers passed as props.
+
+### `EditApplicationPage`
+
+Owns the top-level form state and submission lifecycle for editing an existing application. On mount, calls `GET /api/applications/:id` to fetch the existing record and pre-fill all form fields. On successful `PATCH`, redirects to `/applications`. On cancel, navigates back to `/applications` without submitting. Renders the same `ApplicationForm` used by `AddApplicationPage`, passing `disablePast={false}` to `DatePickerField`.
 
 ### `ApplicationForm`
 
@@ -120,7 +125,7 @@ Lays out all fields and manages field-level validation state. Passes specialised
 
 ### `DatePickerField`
 
-Wraps the `DayPicker` component from `react-day-picker`. Receives `minDate = today` as a prop and passes it to the picker via `disabled={{ before: new Date() }}` to disable past dates. Emits the selected date as an ISO date string (`YYYY-MM-DD`) to the parent form.
+Wraps the `DayPicker` component from `react-day-picker`. Accepts a `disablePast` boolean prop (defaults to `true`). When `disablePast` is `true` (add flow), past dates are disabled via `disabled={{ before: new Date() }}`. When `disablePast` is `false` (edit flow), no date restriction is applied and all dates — including past dates — are selectable. Emits the selected date as an ISO date string (`YYYY-MM-DD`) to the parent form.
 
 ### `SalaryFields`
 
@@ -143,11 +148,15 @@ Behaviour:
 
 Manages its own internal list state (array of strings). Exposes the current list to `ApplicationForm` via a callback whenever the list changes.
 
+**Initial state:** the list is pre-populated with the following items (in order): CV, Cover Letter, Research Statement, Teaching Philosophy, Teaching Portfolio, Letters of Recommendation, DEI Statement, Transcript.
+
+**Layout:** the current list of `ArtifactItem` components is rendered first; the text input and Add button row sits below the list. New artifacts are appended to the end of the list and therefore appear directly above the input row.
+
 Internal behaviour:
-- Text input + Add button (also triggered on Enter keypress)
-- On add: trims whitespace, checks for empty string, checks for duplicate (case-insensitive) against current list, appends to list and clears input if valid, shows inline error if invalid
-- On remove: splices the item from the list by index
-- Renders the current list as `ArtifactItem` components
+- Text input + Add button (also triggered on Enter keypress) rendered below the artifact list
+- On add: trims whitespace, checks for empty string, checks for duplicate (case-insensitive) against current list, appends to end of list and clears input if valid, shows inline error if invalid
+- On remove: splices the item from the list by index; works identically for pre-populated and user-added items
+- Renders the current list as `ArtifactItem` components above the input row
 
 ### `ArtifactItem`
 
@@ -234,9 +243,19 @@ Renders a single artifact label and a remove (`×`) button. Calls the remove han
 
 | Method | Path | Auth required | Description |
 |--------|------|--------------|-------------|
+| `GET` | `/api/applications/:id` | Yes | Fetch a single application by ID (used by the edit form to pre-populate fields) |
 | `POST` | `/api/applications` | Yes | Create a new application for the current user |
 
-**Request body:**
+**`GET /api/applications/:id` — responses:**
+
+| Status | Condition |
+|--------|-----------|
+| `200 OK` | Application found; body contains the full application record including artifacts |
+| `401 Unauthorized` | No valid session |
+| `403 Forbidden` | Application exists but belongs to a different user |
+| `404 Not Found` | No application with that ID |
+
+**`POST /api/applications` — request body:**
 
 ```json
 {
@@ -253,7 +272,7 @@ Renders a single artifact label and a remove (`×`) button. Calls the remove han
 
 > `status` is not accepted in the request body. The server always sets it to `NOT_SUBMITTED` on creation. Any `status` value sent by the client must be ignored.
 
-**Responses:**
+**`POST /api/applications` — responses:**
 
 | Status | Condition |
 |--------|-----------|

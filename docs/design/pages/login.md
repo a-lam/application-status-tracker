@@ -152,4 +152,4 @@ Shown when the API returns an error (rate limited, server error, etc.). Displays
 | `/login` | Login page (this page) |
 | `/api/auth/magic-link/send` | Backend endpoint called on form submit |
 | `/api/auth/magic-link/verify` | Backend endpoint the magic link redirects to |
-| `/` or `/dashboard` | Destination after successful sign-in |
+| `/applications` | Destination after successful sign-in |

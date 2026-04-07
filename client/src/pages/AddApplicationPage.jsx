@@ -3,6 +3,17 @@ import { useNavigate, Link } from "react-router-dom";
 import { createApplication } from "../lib/api.js";
 import ApplicationForm from "../components/applications/ApplicationForm.jsx";
 
+const DEFAULT_ARTIFACTS = [
+  "CV",
+  "Cover Letter",
+  "Research Statement",
+  "Teaching Philosophy",
+  "Teaching Portfolio",
+  "Letters of Recommendation",
+  "DEI Statement",
+  "Transcript",
+];
+
 const INITIAL_FORM = {
   employer: "",
   jobTitle: "",
@@ -11,7 +22,7 @@ const INITIAL_FORM = {
   salaryMin: "",
   salaryMax: "",
   salaryCurrency: "CAD",
-  artifacts: [],
+  artifacts: DEFAULT_ARTIFACTS,
 };
 
 export default function AddApplicationPage() {

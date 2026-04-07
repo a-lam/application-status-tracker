@@ -35,6 +35,18 @@ export default function ArtifactListInput({ artifacts, onChange }) {
 
   return (
     <div className="artifact-list-input">
+      {artifacts.length > 0 && (
+        <div className="artifact-list">
+          {artifacts.map((label, i) => (
+            <ArtifactItem
+              key={`${label}-${i}`}
+              label={label}
+              onRemove={() => handleRemove(i)}
+            />
+          ))}
+        </div>
+      )}
+
       <div className="artifact-list-input__controls">
         <input
           type="text"
@@ -57,18 +69,6 @@ export default function ArtifactListInput({ artifacts, onChange }) {
         <span id="artifact-error" className="field-error" role="alert">
           {inlineError}
         </span>
-      )}
-
-      {artifacts.length > 0 && (
-        <div className="artifact-list">
-          {artifacts.map((label, i) => (
-            <ArtifactItem
-              key={`${label}-${i}`}
-              label={label}
-              onRemove={() => handleRemove(i)}
-            />
-          ))}
-        </div>
       )}
     </div>
   );

@@ -102,6 +102,7 @@ export default function EditApplicationPage() {
           onCancel={handleCancel}
           serverErrors={serverErrors}
           submitting={submitting}
+          disablePast={false}
         />
       )}
     </div>

@@ -98,7 +98,7 @@ Called as the very first line of `index.js` (before any imports that might trigg
 ### Sign-Out
 
 ```
-1. Client calls POST /api/auth/signout
+1. Client calls POST /api/auth/sign-out
 
 2. better-auth
    a. Reads session token from cookie
