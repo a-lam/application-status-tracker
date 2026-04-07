@@ -12,6 +12,7 @@ export default function ApplicationsListPage() {
   const [error, setError] = useState(null);
   const [pendingDelete, setPendingDelete] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [statusAnnouncement, setStatusAnnouncement] = useState("");
   const menuRef = useRef(null);
   const { data: session } = authClient.useSession();
   const pendingDeleteTriggerRef = useRef(null);
@@ -70,6 +71,11 @@ export default function ApplicationsListPage() {
     try {
       const updated = await updateApplicationStatus(id, newStatus);
       setApplications((apps) => apps.map((a) => (a.id === id ? updated : a)));
+      const app = applications.find((a) => a.id === id);
+      const label = newStatus === "SUBMITTED" ? "Submitted" : "Not Submitted";
+      if (app) {
+        setStatusAnnouncement(`${app.jobTitle} at ${app.employer} marked as ${label}.`);
+      }
     } catch {
       // status toggle failure is silent; a retry is available via the kebab menu
     }
@@ -101,9 +107,17 @@ export default function ApplicationsListPage() {
 
   return (
     <div className="page">
+      <div aria-live="polite" aria-atomic="true" role="status" className="sr-only">
+        {statusAnnouncement}
+      </div>
+
       <div className="page-header">
-        <Link to="/applications/new" className="btn btn-primary add-application-btn">
-          <span className="add-application-btn__full">+ Add an application</span>
+        <Link
+          to="/applications/new"
+          className="btn btn-primary add-application-btn"
+          aria-label="Add an application"
+        >
+          <span className="add-application-btn__full" aria-hidden="true">+ Add an application</span>
           <span className="add-application-btn__short" aria-hidden="true">+</span>
         </Link>
         <div className="page-header__right">

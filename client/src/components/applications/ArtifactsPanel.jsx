@@ -21,7 +21,7 @@ export default function ArtifactsPanel({ applicationId, artifacts, onArtifactTog
         <span className="artifacts-panel__arrow" aria-hidden="true">
           {open ? "▼" : "▶"}
         </span>
-        Artifacts ({completedCount}/{totalCount} completed)
+        {open ? "Hide" : "Show"} artifacts ({completedCount}/{totalCount} completed)
       </button>
 
       {open && (
