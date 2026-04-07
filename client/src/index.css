@@ -64,6 +64,18 @@ body {
   margin-bottom: 1.75rem;
 }
 
+.add-application-btn__short { display: none; }
+
+@media (max-width: 480px) {
+  .add-application-btn__full { display: none; }
+  .add-application-btn__short { display: inline; }
+  .add-application-btn {
+    padding: 0.5rem 0.75rem;
+    font-size: 1.25rem;
+    line-height: 1;
+  }
+}
+
 .page-header h1 {
   font-size: 1.5rem;
   font-weight: 700;

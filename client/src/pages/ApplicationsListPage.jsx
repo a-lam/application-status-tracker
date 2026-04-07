@@ -102,8 +102,9 @@ export default function ApplicationsListPage() {
   return (
     <div className="page">
       <div className="page-header">
-        <Link to="/applications/new" className="btn btn-primary">
-          + Add an application
+        <Link to="/applications/new" className="btn btn-primary add-application-btn">
+          <span className="add-application-btn__full">+ Add an application</span>
+          <span className="add-application-btn__short" aria-hidden="true">+</span>
         </Link>
         <div className="page-header__right">
           {session?.user?.email && (
