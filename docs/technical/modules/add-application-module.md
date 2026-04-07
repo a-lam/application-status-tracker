@@ -21,18 +21,21 @@ The `Application` model previously defined in the [applications list module](app
 
 ```prisma
 model Application {
-  id             String            @id @default(cuid())
-  dueDate        DateTime
-  employer       String
-  jobTitle       String
-  jobDescription String?
-  status         ApplicationStatus @default(NOT_SUBMITTED)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  id              String            @id @default(cuid())
+  dueDate         DateTime
+  employer        String
+  jobTitle        String
+  jobDescription  String?
+  salaryMin       Decimal?          @db.Decimal(12, 2)
+  salaryMax       Decimal?          @db.Decimal(12, 2)
+  salaryCurrency  String?
+  status          ApplicationStatus @default(NOT_SUBMITTED)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
-  userId         String
-  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  artifacts      Artifact[]
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artifacts       Artifact[]
 
   @@map("applications")
 }
@@ -61,6 +64,8 @@ enum ApplicationStatus {
 - `artifactsRequired String` is removed entirely; replaced by the `artifacts` relation
 - `Artifact.order` preserves the user's insertion order when the list is rendered
 - `@@unique([applicationId, label])` enforces the no-duplicate-artifact rule at the database level as a backstop to the client-side check
+- `salaryMin` and `salaryMax` are nullable `Decimal(12,2)` — both are optional; neither implies the other
+- `salaryCurrency` is a nullable `String` storing the ISO 4217 currency code (e.g. `"CAD"`); stored alongside the salary values and treated as optional if both salary fields are null
 
 ---
 
@@ -85,6 +90,7 @@ client/src/
     └── applications/
         ├── ApplicationForm.jsx      ← Form shell, field layout, validation orchestration
         ├── DatePickerField.jsx      ← Calendar widget wrapper, enforces min date = today
+        ├── SalaryFields.jsx         ← Currency selector + starting/max salary inputs with cross-field validation
         ├── ArtifactListInput.jsx    ← Add/remove artifact items; manages local list state
         └── ArtifactItem.jsx         ← Single artifact row with label and remove button
 ```
@@ -104,6 +110,9 @@ Lays out all fields and manages field-level validation state. Passes specialised
 | Employer | `<input type="text">` | Yes | |
 | Job Title | `<input type="text">` | Yes | |
 | Due Date | `DatePickerField` | Yes | Calendar widget, today or future only |
+| Starting Salary | `SalaryFields` (text input, numeric keyboard) | No | Must be < Maximum Salary when both are provided; validated on blur and Save |
+| Maximum Salary | `SalaryFields` (text input, numeric keyboard) | No | Must be > Starting Salary when both are provided; validated on blur and Save |
+| Currency | `SalaryFields` (selector) | No | Defaults to CAD; positioned to the right of the two salary inputs on wide viewports |
 | Job Description | `<textarea>` | No | |
 | Artifacts | `ArtifactListInput` | No | List builder, not a text field |
 
@@ -112,6 +121,23 @@ Lays out all fields and manages field-level validation state. Passes specialised
 ### `DatePickerField`
 
 Wraps the `DayPicker` component from `react-day-picker`. Receives `minDate = today` as a prop and passes it to the picker via `disabled={{ before: new Date() }}` to disable past dates. Emits the selected date as an ISO date string (`YYYY-MM-DD`) to the parent form.
+
+### `SalaryFields`
+
+Renders a grouped section containing two `<input type="text" inputMode="numeric">` fields (Starting Salary and Maximum Salary) and a currency `<select>`. Using `type="text"` preserves the raw typed value so that entries like `"100000s"` are visible to validation rather than being silently discarded by the browser. On wide viewports all three controls sit on a single row with currency to the right of the salary inputs; on narrow viewports the currency selector wraps to a second row below. Manages no internal state — all values are lifted to `ApplicationForm` via callbacks.
+
+Behaviour:
+- **Layout:** Starting Salary and Maximum Salary are on the left; Currency is to the right on the same row. When the viewport narrows and the row cannot fit all three controls, Currency wraps below the salary inputs.
+- Currency selector defaults to `"CAD"` on mount; other options: USD, EUR, GBP, AUD, JPY
+- Salary inputs use `type="text"` with `inputMode="numeric"` — the raw string is validated against `^\d+(\.\d+)?$`; anything that does not match (including letters, symbols, or negative signs) is treated as invalid
+- **Per-field validation** runs on blur of either salary input and when the form's Save action is triggered:
+  - Negative or non-numeric value → field shown in error state with inline message; form blocked from submitting
+  - Empty value → no error (field is optional)
+  - Valid non-negative number → field shown in valid state (error cleared)
+- **Cross-field validation** runs on blur of either salary input and on form submit:
+  - If both values are present and `salaryMin >= salaryMax`, an inline error is shown: _"Starting salary must be less than maximum salary"_
+  - If only one value is present, no cross-field error is shown
+- Emits `{ salaryMin, salaryMax, salaryCurrency }` to `ApplicationForm` whenever any value changes
 
 ### `ArtifactListInput`
 
@@ -142,17 +168,22 @@ Renders a single artifact label and a remove (`×`) button. Calls the remove han
 
 4. AddApplicationPage calls POST /api/applications with body:
    {
-     employer:       "Acme Corp",
-     jobTitle:       "Senior Engineer",
-     dueDate:        "2026-04-15",
-     jobDescription: "...",          // optional, omitted if empty
-     artifacts:      ["CV", "Cover Letter"]   // ordered array of strings
+     employer:        "Acme Corp",
+     jobTitle:        "Senior Engineer",
+     dueDate:         "2026-04-15",
+     jobDescription:  "...",          // optional, omitted if empty
+     salaryMin:       50000,          // optional, omitted if empty
+     salaryMax:       80000,          // optional, omitted if empty
+     salaryCurrency:  "CAD",          // optional, omitted if both salary fields are empty
+     artifacts:       ["CV", "Cover Letter"]   // ordered array of strings
    }
    // status is NOT sent by the client — server always creates with NOT_SUBMITTED
 
 5. Server — POST /api/applications handler
    a. Validates session → 401 if missing
    b. Validates required fields (employer, jobTitle, dueDate) → 422 with errors if invalid
+      Validates salary: if both salaryMin and salaryMax are present, salaryMin must be < salaryMax → 422 if violated
+      Validates salary values: must be non-negative numbers if provided → 422 if violated
    c. Begins a Prisma transaction:
       i.  Creates Application record with userId from session
       ii. Creates one Artifact record per item in artifacts[], with order = array index
@@ -209,11 +240,14 @@ Renders a single artifact label and a remove (`×`) button. Calls the remove han
 
 ```json
 {
-  "employer":       "string (required)",
-  "jobTitle":       "string (required)",
-  "dueDate":        "YYYY-MM-DD (required, today or future)",
-  "jobDescription": "string (optional)",
-  "artifacts":      ["string", "..."]
+  "employer":        "string (required)",
+  "jobTitle":        "string (required)",
+  "dueDate":         "YYYY-MM-DD (required, today or future)",
+  "jobDescription":  "string (optional)",
+  "salaryMin":       "number (optional, non-negative)",
+  "salaryMax":       "number (optional, non-negative, must be > salaryMin when both present)",
+  "salaryCurrency":  "string (optional, ISO 4217 code, e.g. \"CAD\")",
+  "artifacts":       ["string", "..."]
 }
 ```
 
@@ -225,7 +259,7 @@ Renders a single artifact label and a remove (`×`) button. Calls the remove han
 |--------|-----------|
 | `201 Created` | Application created successfully; body contains the new application with its ID and artifacts |
 | `401 Unauthorized` | No valid session |
-| `422 Unprocessable Entity` | Required fields missing or `dueDate` is in the past |
+| `422 Unprocessable Entity` | Required fields missing, `dueDate` is in the past, salary values are negative, or `salaryMin >= salaryMax` when both are provided |
 
 ---
 

@@ -19,6 +19,7 @@ The add application page is where a user records a new job application they want
 | `AddApplicationPage` | Page shell, owns submit lifecycle and navigation |
 | `ApplicationForm` | Field layout and validation orchestration |
 | `DatePickerField` | Calendar widget for due date, min date = today |
+| `SalaryFields` | Currency selector + starting and maximum salary inputs with cross-field validation |
 | `ArtifactListInput` | Add/remove artifact items as a managed list |
 | `ArtifactItem` | Single artifact row with remove button |
 
@@ -48,6 +49,16 @@ The add application page is where a user records a new job application they want
 - Each artifact row has a `×` remove button
 - Adding a duplicate (case-insensitive) shows an inline error and does not add the item
 - Clicking Add on an empty input does nothing
+
+### Salary section
+
+- The Salary section appears above the Job Description field
+- On wide viewports, Starting Salary and Maximum Salary are on the left and Currency is on the right, all on a single row; on narrow viewports, Currency wraps to a second row below the salary inputs
+- The currency dropdown defaults to CAD
+- All three controls are optional — leaving them blank is valid
+- **Validation on blur and Save:** when the user leaves a salary input, or clicks Save, the field immediately shows an error state (red border + inline message) if the value is negative or non-numeric, or clears any error if the value is valid or empty; Save is blocked while any salary field is invalid
+- If only one salary value is entered, no cross-field error is shown
+- If both salary values are entered and Starting Salary ≥ Maximum Salary, an inline error appears on blur or on Save attempt: _"Starting salary must be less than maximum salary"_
 
 ### Validation
 
@@ -89,6 +100,14 @@ If the user's session expires while they are filling in this form, they are auto
 │  ┌──────────────────────────────────────────────────┐ │
 │  │  Select a date...                       [📅]     │ │
 │  └──────────────────────────────────────────────────┘ │
+│                                                        │
+│  Salary                                                │
+│  ┌────────────────────┐  ┌────────────────┐  ┌──────┐ │
+│  │  Starting Salary   │  │ Maximum Salary │  │ CAD▾ │ │
+│  │  ┌──────────────┐  │  │ ┌────────────┐ │  └──────┘ │
+│  │  │              │  │  │ │            │ │           │
+│  │  └──────────────┘  │  │ └────────────┘ │           │
+│  └────────────────────┘  └────────────────┘           │
 │                                                        │
 │  Job Description                                       │
 │  ┌──────────────────────────────────────────────────┐ │
@@ -161,6 +180,51 @@ If the user's session expires while they are filling in this form, they are auto
 │  │                                                  │ │
 │  └──────────────────────────────────────────────────┘ │
 │  ⚠ Job title is required                              │
+```
+
+### Salary validation state (starting ≥ maximum)
+
+```
+│  Salary                                                │
+│  ┌──────────────────────┐  ┌──────────────┐  ┌──────┐ │
+│  │  Starting Salary     │  │ Maximum Sal. │  │ CAD▾ │ │
+│  │  ┌──────────────┐    │  │ ┌──────────┐ │  └──────┘ │
+│  │  │  90000    [!]│    │  │ │  80000   │ │           │
+│  │  └──────────────┘    │  │ └──────────┘ │           │
+│  └──────────────────────┘  └──────────────┘           │
+│  ⚠ Starting salary must be less than maximum salary   │
+```
+
+### Salary blur validation state (invalid individual field)
+
+```
+│  Salary                                                │
+│  ┌──────────────────────┐  ┌──────────────┐  ┌──────┐ │
+│  │  Starting Salary     │  │ Maximum Sal. │  │ CAD▾ │ │
+│  │  ┌──────────────┐    │  │ ┌──────────┐ │  └──────┘ │
+│  │  │  -5000    [!]│    │  │ │          │ │           │
+│  │  └──────────────┘    │  │ └──────────┘ │           │
+│  └──────────────────────┘  └──────────────┘           │
+│  ⚠ Starting salary must be a non-negative number      │
+```
+
+*(Error shown immediately on blur, before Save is clicked. The [!] icon represents the red border on the invalid input.)*
+
+### Salary layout on narrow viewports
+
+```
+│  Salary                                                │
+│  ┌─────────────────────────────────────────────────┐  │
+│  │  Starting Salary      Maximum Salary            │  │
+│  │  ┌────────────────┐   ┌───────────────────────┐ │  │
+│  │  │                │   │                       │ │  │
+│  │  └────────────────┘   └───────────────────────┘ │  │
+│  │                                                 │  │
+│  │  Currency                                       │  │
+│  │  ┌───────────────┐                              │  │
+│  │  │  CAD ▾        │                              │  │
+│  │  └───────────────┘                              │  │
+│  └─────────────────────────────────────────────────┘  │
 ```
 
 ---

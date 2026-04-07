@@ -59,7 +59,7 @@
 
 | # | Given | When | Then |
 |---|-------|------|------|
-| AC-12-1 | An application exists | The page renders | Each application card displays: Job Title with submission status in parentheses, Employer (below the title, italicised and smaller), Due Date, Job Description, and Artifacts Required |
+| AC-12-1 | An application exists | The page renders | Each application card displays: Job Title with submission status in parentheses, Employer (below the title, italicised and smaller), Due Date, Salary (if present), Job Description, and Artifacts Required |
 | AC-12-2 | An application has a long job description | The page renders | The description is truncated after 6 lines with a "show more" control that reveals the full text |
 | AC-12-3 | An application has a short job description that fits within 6 lines | The page renders | The full description is shown with no "show more" control visible |
 | AC-12-4 | An application's due date is in the future | The page renders | The due date is displayed as `D Mon YYYY (N days away)`, e.g. "21 May 2026 (50 days away)" |
@@ -68,6 +68,10 @@
 | AC-12-7 | An application exists | The page renders | A "Job Description:" label appears directly above the job description text |
 | AC-12-8 | An application's status is `NOT_SUBMITTED` | The page renders | The job title line reads "Job Title (Not Submitted)" |
 | AC-12-9 | An application's status is `SUBMITTED` | The page renders | The job title line reads "Job Title (Submitted)" |
+| AC-12-10 | An application has both a starting salary and a maximum salary | The page renders | The salary range is displayed as `[symbol][min]–[symbol][max] [code]`, e.g. "$80,000–$120,000 CAD" |
+| AC-12-11 | An application has only a starting salary | The page renders | The salary is displayed as `[symbol][min]+ [code]`, e.g. "$80,000+ CAD" |
+| AC-12-12 | An application has only a maximum salary | The page renders | The salary is displayed as `up to [symbol][max] [code]`, e.g. "up to $120,000 CAD" |
+| AC-12-13 | An application has no salary values | The page renders | No salary line is shown on the card |
 
 ---
 
@@ -160,7 +164,7 @@
 | FR-APPS-01 | The system must return only the applications belonging to the currently authenticated user — never another user's data. |
 | FR-APPS-09 | The application root route (`/`) must redirect signed-in users to the applications list page and redirect unauthenticated users to the sign-in page. |
 | FR-APPS-02 | Applications must be returned ordered by `dueDate` ascending (earliest first). |
-| FR-APPS-03 | Each application record must store: `dueDate`, `employer`, `jobTitle`, `jobDescription`, `artifacts`, and `status`. |
+| FR-APPS-03 | Each application record must store: `dueDate`, `employer`, `jobTitle`, `jobDescription`, `salaryMin`, `salaryMax`, `salaryCurrency`, `artifacts`, and `status`. |
 | FR-APPS-04 | The `status` field must be constrained to exactly two values: `NOT_SUBMITTED` (default) and `SUBMITTED`. |
 | FR-APPS-05 | The UI must derive the urgency colour band from the `dueDate` at render time using the client's local date — no separate field is stored for urgency. |
 | FR-APPS-06 | The API endpoint for listing applications must return HTTP 401 if the request has no valid session. |
@@ -168,6 +172,7 @@
 | FR-APPS-08 | When a user has no applications, the page must display an empty state rather than a blank or broken layout. |
 | FR-APPS-10 | The due date display must append a days-remaining suffix for future dates (e.g. "(17 days away)"), show "(Today)" when the due date is today, and show the date alone when the due date is in the past. |
 | FR-APPS-11 | The "show more" control on job descriptions must only appear when the description content actually overflows 6 lines — it must not render when the full description fits within 6 lines. |
+| FR-APPS-19 | If an application has salary data, the card must display it with the currency symbol before each amount and the currency code after. The format depends on which values are present: both min and max → `[symbol][min]–[symbol][max] [code]`; min only → `[symbol][min]+ [code]`; max only → `up to [symbol][max] [code]`. If neither salary value is present, no salary line is rendered. The currency symbol must reflect the stored currency code (e.g. $ for CAD/USD, € for EUR, £ for GBP, $ for AUD, ¥ for JPY). |
 | FR-APPS-12 | Each application card must expose a kebab (`⋮`) menu with three actions: Update Status, Edit Application, and Delete Application. |
 | FR-APPS-13 | The Update Status action must toggle the application's status between `NOT_SUBMITTED` and `SUBMITTED` with a single click and no confirmation prompt. The label must show the target status, not the current one. |
 | FR-APPS-14 | The Edit Application action must navigate to a pre-filled edit form at `/applications/:id/edit`; on save the user returns to the list with updated data. |

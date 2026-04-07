@@ -304,6 +304,7 @@ body {
 
 .field input[type="text"],
 .field input[type="email"],
+.field input[type="number"],
 .field textarea,
 .field select {
   border: 1px solid var(--border-input);
@@ -319,6 +320,7 @@ body {
 
 .field input[type="text"]:focus,
 .field input[type="email"]:focus,
+.field input[type="number"]:focus,
 .field textarea:focus,
 .field select:focus {
   outline: none;
@@ -413,6 +415,12 @@ body {
   font-size: 0.8125rem;
   color: var(--text-2);
   white-space: nowrap;
+}
+
+.app-card__salary {
+  font-size: 0.875rem;
+  color: var(--text-2);
+  margin-bottom: 0.5rem;
 }
 
 .app-card__description {
@@ -685,6 +693,38 @@ body {
 
 .artifact-item__remove:hover { color: var(--danger); background: #fef2f2; }
 .artifact-item__remove:focus-visible { outline: none; box-shadow: 0 0 0 2px rgba(220,38,38,0.3); }
+
+/* ── Salary fields ──────────────────────────────────────────────────────────── */
+.salary-fields {
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.salary-fields legend {
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--text-2);
+  padding: 0 0.25rem;
+}
+
+.salary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.salary-row .field {
+  flex: 1 1 140px;
+  margin-bottom: 0;
+}
+
+.salary-row .salary-currency {
+  flex: 0 1 100px;
+  min-width: 80px;
+}
 
 /* ── App form ───────────────────────────────────────────────────────────────── */
 .app-form {

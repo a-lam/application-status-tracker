@@ -23,6 +23,9 @@ export default function EditApplicationPage() {
           jobTitle: app.jobTitle,
           dueDate: app.dueDate.slice(0, 10),
           jobDescription: app.jobDescription ?? "",
+          salaryMin: app.salaryMin != null ? String(app.salaryMin) : "",
+          salaryMax: app.salaryMax != null ? String(app.salaryMax) : "",
+          salaryCurrency: app.salaryCurrency ?? "CAD",
           artifacts: app.artifacts.map((a) => a.label),
         });
       } catch {

@@ -122,6 +122,9 @@ All models are defined in [server/prisma/schema.prisma](../../server/prisma/sche
 | `employer` | `String` | NOT NULL | |
 | `jobTitle` | `String` | NOT NULL | |
 | `jobDescription` | `String?` | nullable | Optional |
+| `salaryMin` | `Decimal(12,2)?` | nullable | Optional starting salary |
+| `salaryMax` | `Decimal(12,2)?` | nullable | Optional maximum salary; must be > `salaryMin` when both are present |
+| `salaryCurrency` | `String?` | nullable | ISO 4217 currency code (e.g. `"CAD"`); stored alongside salary values |
 | `status` | `ApplicationStatus` | NOT NULL, default `NOT_SUBMITTED` | `NOT_SUBMITTED` or `SUBMITTED` — changed only via the list page kebab menu |
 | `createdAt` | `DateTime` | NOT NULL, default now | |
 | `updatedAt` | `DateTime` | NOT NULL, auto-update | |

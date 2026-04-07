@@ -123,6 +123,7 @@ Clicking outside the open menu closes it without taking any action.
 │ │ bgcolor: light red                               │   │
 │ │  Senior Frontend Engineer (Submitted)        [⋮] │   │
 │ │  Acme Corp        Due: 3 Apr 2026 (2 days away)  │   │
+│ │  $90,000–$120,000 CAD                            │   │
 │ │                                                  │   │
 │ │  Job Description:                                │   │
 │ │  We are looking for an experienced engineer...   │   │
@@ -135,6 +136,7 @@ Clicking outside the open menu closes it without taking any action.
 │ │ bgcolor: light yellow                            │   │
 │ │  Product Designer (Not Submitted)            [⋮] │   │
 │ │  Globex Inc       Due: 6 Apr 2026 (5 days away)  │   │
+│ │  $70,000+ CAD                                    │   │
 │ │                                                  │   │
 │ │  Job Description:                                │   │
 │ │  Designing for a platform used by millions...    │   │
@@ -167,7 +169,7 @@ Clicking outside the open menu closes it without taking any action.
 └────────────────────────────────────────────────────────┘
 ```
 
-> **Note:** Dates shown relative to today (1 Apr 2026) for illustration. Acme Corp (2 days away) = urgent/red. Globex Inc (5 days away) = soon/yellow. Initech (19 days away) = future/green. Umbrella Ltd (past due) = grey, no suffix.
+> **Note:** Dates shown relative to today (1 Apr 2026) for illustration. Acme Corp (2 days away) = urgent/red. Globex Inc (5 days away) = soon/yellow. Initech (19 days away) = future/green. Umbrella Ltd (past due) = grey, no suffix. Acme Corp shows a full salary range; Globex Inc shows a min-only salary; Initech and Umbrella Ltd have no salary data so no salary line is rendered.
 
 ### Kebab menu open (example: Not Submitted application)
 
@@ -238,6 +240,7 @@ Each card consistently presents fields in the same order:
 ┌──────────────────────────────────────────────────┐
 │  [Job Title] ([Status])                      [⋮] │
 │  [Employer — italic, smaller]   Due: [date str]   │
+│  [Salary range — omitted when no salary present]  │
 │                                                   │
 │  Job Description:                                 │
 │  [Description text — clamped to 6 lines]          │
@@ -255,6 +258,14 @@ Each card consistently presents fields in the same order:
 - Past due: `D Mon YYYY` — e.g. "10 Mar 2026"
 - Due today: `D Mon YYYY (Today)` — e.g. "1 Apr 2026 (Today)"
 - Future: `D Mon YYYY (N days away)` — e.g. "20 Apr 2026 (19 days away)"
+
+**Salary display:**
+- Currency symbol precedes each amount; currency code follows at the end
+- Both min and max present: `$80,000–$120,000 CAD`
+- Min only: `$80,000+ CAD`
+- Max only: `up to $120,000 CAD`
+- Neither present: salary line is not rendered at all
+- Currency symbol mapping: CAD → $, USD → $, EUR → €, GBP → £, AUD → $, JPY → ¥
 
 **Employer typography:**
 - Font size: smaller than the job title (e.g. `0.85rem` vs `1rem`)

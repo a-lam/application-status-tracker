@@ -8,6 +8,9 @@ const INITIAL_FORM = {
   jobTitle: "",
   dueDate: "",
   jobDescription: "",
+  salaryMin: "",
+  salaryMax: "",
+  salaryCurrency: "CAD",
   artifacts: [],
 };
 

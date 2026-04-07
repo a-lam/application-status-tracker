@@ -80,6 +80,9 @@ model Application {
   employer       String
   jobTitle       String
   jobDescription String?
+  salaryMin      Decimal?          @db.Decimal(12, 2)
+  salaryMax      Decimal?          @db.Decimal(12, 2)
+  salaryCurrency String?
   status         ApplicationStatus @default(NOT_SUBMITTED)
   createdAt      DateTime          @default(now())
   updatedAt      DateTime          @updatedAt

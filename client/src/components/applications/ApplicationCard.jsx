@@ -3,6 +3,18 @@ import { format, differenceInCalendarDays, startOfDay } from "date-fns";
 import { getUrgencyBand } from "../../lib/getUrgencyBand.js";
 import KebabMenu from "./KebabMenu.jsx";
 
+const CURRENCY_SYMBOLS = { CAD: "$", USD: "$", EUR: "€", GBP: "£", AUD: "$", JPY: "¥" };
+
+function formatSalary(min, max, currency) {
+  const symbol = CURRENCY_SYMBOLS[currency] ?? "$";
+  const code = currency ?? "";
+  const fmt = (n) => Number(n).toLocaleString("en-CA", { maximumFractionDigits: 0 });
+  if (min != null && max != null) return `${symbol}${fmt(min)}–${symbol}${fmt(max)} ${code}`;
+  if (min != null) return `${symbol}${fmt(min)}+ ${code}`;
+  if (max != null) return `up to ${symbol}${fmt(max)} ${code}`;
+  return null;
+}
+
 function formatDueDate(dueDate) {
   const today = startOfDay(new Date());
   const due = startOfDay(new Date(dueDate));
@@ -22,6 +34,7 @@ export default function ApplicationCard({ application, onStatusToggle, onDeleteR
   const hasDescription = !!application.jobDescription?.trim();
   const hasArtifacts = application.artifacts?.length > 0;
   const statusLabel = application.status === "SUBMITTED" ? "Submitted" : "Not Submitted";
+  const salaryDisplay = formatSalary(application.salaryMin, application.salaryMax, application.salaryCurrency);
 
   useEffect(() => {
     const el = descRef.current;
@@ -56,6 +69,10 @@ export default function ApplicationCard({ application, onStatusToggle, onDeleteR
         <div className="app-card__employer">{application.employer}</div>
         <span className="app-card__due">Due: {formatDueDate(application.dueDate)}</span>
       </div>
+
+      {salaryDisplay && (
+        <div className="app-card__salary">{salaryDisplay}</div>
+      )}
 
       {hasDescription && (
         <div className="app-card__description">

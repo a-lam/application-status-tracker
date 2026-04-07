@@ -1,6 +1,7 @@
 import { useState, useRef } from "react";
 import DatePickerField from "./DatePickerField.jsx";
 import ArtifactListInput from "./ArtifactListInput.jsx";
+import SalaryFields from "./SalaryFields.jsx";
 
 export default function ApplicationForm({
   formData,
@@ -17,12 +18,49 @@ export default function ApplicationForm({
 
   const errors = { ...validationErrors, ...serverErrors };
 
+  function parseSalary(val) {
+    if (val === "" || val === undefined || val === null) return null;
+    const trimmed = String(val).trim();
+    if (trimmed === "") return null;
+    // Must be a valid non-negative number — no letters or symbols allowed
+    if (!/^\d+(\.\d+)?$/.test(trimmed)) return NaN;
+    return parseFloat(trimmed);
+  }
+
+  function validateSalary(min, max) {
+    const errs = {};
+    const parsedMin = parseSalary(min);
+    const parsedMax = parseSalary(max);
+
+    if (parsedMin !== null && (isNaN(parsedMin) || parsedMin < 0)) {
+      errs.salaryMin = "Starting salary must be a non-negative number.";
+    }
+    if (parsedMax !== null && (isNaN(parsedMax) || parsedMax < 0)) {
+      errs.salaryMax = "Maximum salary must be a non-negative number.";
+    }
+    if (!errs.salaryMin && !errs.salaryMax && parsedMin !== null && parsedMax !== null && parsedMin >= parsedMax) {
+      errs.salary = "Starting salary must be less than maximum salary.";
+    }
+    return errs;
+  }
+
   function validate() {
     const errs = {};
     if (!formData.employer?.trim()) errs.employer = "Employer is required.";
     if (!formData.jobTitle?.trim()) errs.jobTitle = "Job title is required.";
     if (!formData.dueDate) errs.dueDate = "Due date is required.";
-    return errs;
+    return { ...errs, ...validateSalary(formData.salaryMin, formData.salaryMax) };
+  }
+
+  function handleSalaryBlur() {
+    const salaryErrs = validateSalary(formData.salaryMin, formData.salaryMax);
+    setValidationErrors((prev) => {
+      const next = { ...prev };
+      delete next.salaryMin;
+      delete next.salaryMax;
+      delete next.salary;
+      return { ...next, ...salaryErrs };
+    });
   }
 
   function handleSave() {
@@ -98,6 +136,19 @@ export default function ApplicationForm({
           error={errors.dueDate}
         />
       </div>
+
+      {/* Salary */}
+      <SalaryFields
+        salaryMin={formData.salaryMin ?? ""}
+        salaryMax={formData.salaryMax ?? ""}
+        salaryCurrency={formData.salaryCurrency ?? "CAD"}
+        onChange={onChange}
+        onBlur={handleSalaryBlur}
+        minError={errors.salaryMin}
+        maxError={errors.salaryMax}
+        crossError={errors.salary}
+        disabled={submitting}
+      />
 
       {/* Job Description */}
       <div className="field">

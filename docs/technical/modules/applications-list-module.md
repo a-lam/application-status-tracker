@@ -66,6 +66,11 @@ Renders a single application's fields. Calls `getUrgencyBand(dueDate)` to determ
 - `KebabMenu` (`⋮` button) — top-right of the title row
 - Employer (directly below the title row — italicised, smaller font size)
 - Due Date (formatted with days-remaining suffix — see `formatDueDate` below)
+- Salary range — only rendered when at least one salary value is present; currency symbol precedes each amount, currency code follows at the end:
+  - Both min and max: `[symbol][min]–[symbol][max] [code]` e.g. "$80,000–$120,000 CAD"
+  - Min only: `[symbol][min]+ [code]` e.g. "$80,000+ CAD"
+  - Max only: `up to [symbol][max] [code]` e.g. "up to $120,000 CAD"
+  - Currency symbol mapping: CAD → $, USD → $, EUR → €, GBP → £, AUD → $, JPY → ¥
 - "Job Description:" label followed by Job Description text (truncated to 6 lines with "show more" if content overflows)
 - Artifacts Required
 
@@ -223,18 +228,21 @@ The authoritative schema is defined in [server/prisma/schema.prisma](../../serve
 
 ```prisma
 model Application {
-  id             String            @id @default(cuid())
-  dueDate        DateTime
-  employer       String
-  jobTitle       String
-  jobDescription String?
-  status         ApplicationStatus @default(NOT_SUBMITTED)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
+  id              String            @id @default(cuid())
+  dueDate         DateTime
+  employer        String
+  jobTitle        String
+  jobDescription  String?
+  salaryMin       Decimal?          @db.Decimal(12, 2)
+  salaryMax       Decimal?          @db.Decimal(12, 2)
+  salaryCurrency  String?
+  status          ApplicationStatus @default(NOT_SUBMITTED)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 
-  userId         String
-  user           User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  artifacts      Artifact[]
+  userId          String
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artifacts       Artifact[]
 
   @@map("applications")
 }
