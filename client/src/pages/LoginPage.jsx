@@ -1,15 +1,26 @@
-import { useState } from "react";
+import { useState, useContext } from "react";
 import MagicLinkForm from "../components/auth/MagicLinkForm.jsx";
 import ConfirmationMessage from "../components/auth/ConfirmationMessage.jsx";
 import { usePageTitle } from "../hooks/usePageTitle.js";
+import { ThemeContext } from "../lib/ThemeContext.js";
 
 export default function LoginPage() {
   usePageTitle("Sign In — Applications Tracker");
   const [state, setState] = useState("idle"); // idle | sent
   const [sentEmail, setSentEmail] = useState("");
+  const { theme, toggleTheme } = useContext(ThemeContext);
 
   return (
     <div className="login-page">
+      <button
+        type="button"
+        className="login-theme-toggle"
+        aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+        aria-pressed={theme === "dark"}
+        onClick={toggleTheme}
+      >
+        {theme === "dark" ? "☀" : "☾"}
+      </button>
       <div className="login-card">
         <h1 className="login-title">Applications Tracker</h1>
 

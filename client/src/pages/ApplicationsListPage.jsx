@@ -1,7 +1,8 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getApplications, updateApplicationStatus, deleteApplication, updateArtifactCompleted } from "../lib/api.js";
 import { authClient } from "../lib/auth.js";
+import { ThemeContext } from "../lib/ThemeContext.js";
 import ApplicationList from "../components/applications/ApplicationList.jsx";
 import EmptyState from "../components/applications/EmptyState.jsx";
 import DeleteConfirmDialog from "../components/applications/DeleteConfirmDialog.jsx";
@@ -9,6 +10,7 @@ import { usePageTitle } from "../hooks/usePageTitle.js";
 
 export default function ApplicationsListPage() {
   usePageTitle("Applications Tracker");
+  const { theme, toggleTheme } = useContext(ThemeContext);
   const [applications, setApplications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -152,6 +154,16 @@ export default function ApplicationsListPage() {
             </button>
             {menuOpen && (
               <ul className="kebab-menu__dropdown" role="menu">
+                <li role="none">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="kebab-menu__item"
+                    onClick={() => { toggleTheme(); setMenuOpen(false); }}
+                  >
+                    {theme === "dark" ? "Light Mode" : "Dark Mode"}
+                  </button>
+                </li>
                 <li role="none">
                   <button
                     type="button"

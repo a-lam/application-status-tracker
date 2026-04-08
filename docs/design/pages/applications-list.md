@@ -49,17 +49,19 @@ Status is displayed inline in the job title line as plain text in parentheses �
 
 The background colour of each `ApplicationCard` is determined by **status first, deadline second**, evaluated at page load.
 
-| Status group | Deadline condition | Background |
-|---|---|---|
-| `REJECTED`, `WITHDRAWN`, `OFFER_DECLINED` | Any | Light grey (`#f0f0f0`) — resolved unfavourably; no action warranted |
-| `NOT_SUBMITTED` | Past (today > due date) | Light red (`#fde8e8`) — missed the window to submit |
-| `NOT_SUBMITTED` | 0–3 days away | Light yellow (`#fef9c3`) — submit soon |
-| `NOT_SUBMITTED` | 4+ days away | Light green (`#dcfce7`) — plenty of time |
-| `SUBMITTED`, `INTERVIEWING`, `OFFER_RECEIVED`, `OFFER_ACCEPTED` | Any | Light green (`#dcfce7`) — active in the pipeline |
+| Status group | Deadline condition | Light bg | Dark bg |
+|---|---|---|---|
+| `REJECTED`, `WITHDRAWN`, `OFFER_DECLINED` | Any | Light grey (`#f0f0f0`) | `#1e2939` |
+| `NOT_SUBMITTED` | Past (today > due date) | Light red (`#fde8e8`) | `#3b0f0f` |
+| `NOT_SUBMITTED` | 0–3 days away | Light yellow (`#fef9c3`) | `#3b2508` |
+| `NOT_SUBMITTED` | 4+ days away | Light green (`#dcfce7`) | `#052e16` |
+| `SUBMITTED`, `INTERVIEWING`, `OFFER_RECEIVED`, `OFFER_ACCEPTED` | Any | Light green (`#dcfce7`) | `#052e16` |
 
-Cards with status `OFFER_ACCEPTED` additionally render with a **bold black border** (thicker than the default card border) to visually distinguish them from all other cards at a glance.
+Cards with status `OFFER_ACCEPTED` additionally render with a **bold border** to visually distinguish them from all other cards at a glance. In light mode this is `3px solid #000`; in dark mode it is `3px solid rgba(255,255,255,0.75)`.
 
-All cards scope the CSS custom property `--text-3` to `#4b5563` (darker than the global value of `#6b7280`). This ensures secondary text elements — employer name, description label, status text, artifacts arrow — achieve a contrast ratio of at least 4.5:1 against every urgency-band background, meeting WCAG AA.
+All cards scope the CSS custom property `--text-3` to `#4b5563` (darker than the global value of `#6b7280`). This ensures secondary text elements — employer name, description label, status text, artifacts arrow — achieve a contrast ratio of at least 4.5:1 against every light urgency-band background, meeting WCAG AA. In dark mode this scoped value is overridden to `#d1d5db`, which passes 4.5:1 on all four dark urgency band backgrounds.
+
+Dark-mode urgency band colours are defined in [design/dark-mode.md](../dark-mode.md).
 
 ---
 
@@ -93,7 +95,8 @@ If the user's session expires while they are on this page, they are automaticall
 
 The page header contains the authenticated user's email address (hidden on mobile viewports ≤ 480 px) displayed as plain text, immediately followed by a `⋮` (three-dot vertical) icon in the top-right corner. Clicking the icon opens a small dropdown with:
 
-1. **Logout** — ends the user's session server-side and redirects to the sign-in page
+1. **Dark Mode / Light Mode** — toggles between light and dark mode; the label reads "Dark Mode" when the app is in light mode and "Light Mode" when in dark mode
+2. **Logout** — ends the user's session server-side and redirects to the sign-in page
 
 ### Kebab menu
 
@@ -282,11 +285,14 @@ Clicking outside the open menu closes it without taking any action.
 ```
 ┌────────────────────────────────────────────────────────┐
 │  [+ Add an application]       user@example.com   [⋮] ← │
-│                                                ┌──────┤ │
-│                                           Logout│      │ │
-│                                                └──────┘ │
+│                                            ┌──────────┤ │
+│                                  Dark Mode │           │ │
+│                                     Logout │           │ │
+│                                            └──────────┘ │
 └────────────────────────────────────────────────────────┘
 ```
+
+> The first menu item label reads "Dark Mode" when in light mode and "Light Mode" when in dark mode.
 
 ### Empty state
 

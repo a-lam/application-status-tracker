@@ -1,6 +1,6 @@
 # Page: Login
 
-> **Last updated:** 2026-03-29
+> **Last updated:** 2026-04-07
 > **Feature requirements:** [requirements/features/authentication.md](../../requirements/features/authentication.md)
 > **Technical module:** [technical/modules/authentication-module.md](../../technical/modules/authentication-module.md)
 
@@ -21,7 +21,18 @@ Users land here when:
 
 ### `<LoginPage>`
 
-Top-level page component. Manages the request lifecycle state (idle → loading → sent → error) and conditionally renders the form or the confirmation view.
+Top-level page component. Manages the request lifecycle state (idle → loading → sent → error) and conditionally renders the form or the confirmation view. Also renders the `<ThemeToggleButton>`.
+
+### `<ThemeToggleButton>`
+
+An icon-only button absolutely positioned in the top-right corner of the `.login-page` container. Reads and writes the active theme via `ThemeContext`. Visible before authentication.
+
+| Property | Value |
+|----------|-------|
+| `aria-label` | `"Switch to dark mode"` / `"Switch to light mode"` (dynamic) |
+| `aria-pressed` | `true` when dark mode is active |
+| Minimum touch target | 44 × 44 px |
+| Position | `position: absolute; top: 1rem; right: 1rem` |
 
 ### `<MagicLinkForm>`
 
@@ -83,7 +94,7 @@ Shown when the API returns an error (rate limited, server error, etc.). Displays
 
 ```
 ┌────────────────────────────────────────────────┐
-│                                                │
+│                                           [☾]  │  ← theme toggle (top-right)
 │                                                │
 │              Application Status               │
 │                   Tracker                     │
@@ -142,6 +153,8 @@ Shown when the API returns an error (rate limited, server error, etc.). Displays
 - Error messages must be associated with the input via `aria-describedby`
 - Loading state must be communicated to screen readers via `aria-busy` or a live region
 - The confirmation view must receive focus or announce via `aria-live="polite"` when it replaces the form
+- The theme toggle button must have a dynamic `aria-label` ("Switch to dark mode" / "Switch to light mode") and `aria-pressed` set to `true` when dark mode is active
+- The theme toggle button must be keyboard-operable (Enter/Space) and meet the 44 × 44 px minimum touch target
 
 ---
 

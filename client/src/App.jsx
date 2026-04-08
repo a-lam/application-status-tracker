@@ -1,6 +1,8 @@
 import { useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { authClient } from "./lib/auth.js";
+import { useTheme } from "./lib/useTheme.js";
+import { ThemeContext } from "./lib/ThemeContext.js";
 import LoginPage from "./pages/LoginPage.jsx";
 import ApplicationsListPage from "./pages/ApplicationsListPage.jsx";
 import AddApplicationPage from "./pages/AddApplicationPage.jsx";
@@ -41,8 +43,10 @@ function RootRedirect() {
 }
 
 export default function App() {
+  const { theme, toggleTheme } = useTheme();
+
   return (
-    <>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {import.meta.env.DEV && (
         <div className="dev-banner" aria-hidden="true">Development</div>
       )}
@@ -75,6 +79,6 @@ export default function App() {
       />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-    </>
+    </ThemeContext.Provider>
   );
 }
