@@ -1,4 +1,4 @@
-const CURRENCIES = ["CAD", "USD", "EUR", "GBP", "AUD", "JPY"];
+const CURRENCIES = ["CAD", "USD", "EUR", "GBP", "AUD", "JPY", "KRW"];
 
 export default function SalaryFields({
   salaryMin,

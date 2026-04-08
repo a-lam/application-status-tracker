@@ -349,7 +349,7 @@ Expanded:
 - Min only: `$80,000+ CAD`
 - Max only: `up to $120,000 CAD`
 - Neither present: salary line is not rendered at all
-- Currency symbol mapping: CAD → $, USD → $, EUR → €, GBP → £, AUD → $, JPY → ¥
+- Currency symbol mapping: CAD → $, USD → $, EUR → €, GBP → £, AUD → $, JPY → ¥, KRW → ₩
 
 **Employer typography:**
 - Font size: smaller than the job title (e.g. `0.85rem` vs `1rem`)

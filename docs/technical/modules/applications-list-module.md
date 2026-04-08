@@ -74,7 +74,7 @@ Renders a single application's fields. Calls `getUrgencyBand(dueDate, status)` t
   - Both min and max: `[symbol][min]–[symbol][max] [code]` e.g. "$80,000–$120,000 CAD"
   - Min only: `[symbol][min]+ [code]` e.g. "$80,000+ CAD"
   - Max only: `up to [symbol][max] [code]` e.g. "up to $120,000 CAD"
-  - Currency symbol mapping: CAD → $, USD → $, EUR → €, GBP → £, AUD → $, JPY → ¥
+  - Currency symbol mapping: CAD → $, USD → $, EUR → €, GBP → £, AUD → $, JPY → ¥, KRW → ₩
 - "Job Description:" label followed by Job Description text (truncated to 6 lines with "show more" if content overflows)
 - `ArtifactsPanel` — collapsible artifacts section, collapsed by default
 

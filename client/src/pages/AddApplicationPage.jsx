@@ -9,10 +9,10 @@ const DEFAULT_ARTIFACTS = [
   "Cover Letter",
   "Research Statement",
   "Teaching Philosophy",
-  "Teaching Portfolio",
+  "Teaching Dossier",
   "Letters of Recommendation",
-  "DEI Statement",
-  "Transcript",
+  "EDI Statement",
+  "Writing Samples",
 ];
 
 const INITIAL_FORM = {

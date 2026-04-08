@@ -4,7 +4,7 @@ import { getUrgencyBand } from "../../lib/getUrgencyBand.js";
 import KebabMenu from "./KebabMenu.jsx";
 import ArtifactsPanel from "./ArtifactsPanel.jsx";
 
-const CURRENCY_SYMBOLS = { CAD: "$", USD: "$", EUR: "€", GBP: "£", AUD: "$", JPY: "¥" };
+const CURRENCY_SYMBOLS = { CAD: "$", USD: "$", EUR: "€", GBP: "£", AUD: "$", JPY: "¥", KRW: "₩" };
 
 function formatSalary(min, max, currency) {
   const symbol = CURRENCY_SYMBOLS[currency] ?? "$";

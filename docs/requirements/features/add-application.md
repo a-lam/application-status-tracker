@@ -92,7 +92,7 @@
 
 | # | Given | When | Then |
 |---|-------|------|------|
-| AC-22-1 | I am on the add application page | I view the Artifacts section | I see a pre-populated list containing: CV, Cover Letter, Research Statement, Teaching Philosophy, Teaching Portfolio, Letters of Recommendation, DEI Statement, and Transcript — with a text input and Add button below the list |
+| AC-22-1 | I am on the add application page | I view the Artifacts section | I see a pre-populated list containing: CV, Cover Letter, Research Statement, Teaching Philosophy, Teaching Dossier, Letters of Recommendation, EDI Statement, and Writing Samples — with a text input and Add button below the list |
 | AC-22-2 | I have typed an artifact name in the input | I click Add (or press Enter) | The artifact is inserted above the input field (appended to the end of the list) and the input is cleared |
 | AC-22-3 | The artifacts list has one or more items | I view the list | Each item has a remove control (e.g. × button) beside it |
 | AC-22-4 | The artifacts list has one or more items | I click the remove control on an item | That item is removed from the list; other items are unaffected |
@@ -113,13 +113,13 @@
 | FR-ADDAPP-04 | When creating a new application, the calendar date picker must disable all dates before today; today itself must be selectable. This restriction does not apply when editing an existing application. |
 | FR-ADDAPP-21 | When editing an existing application, all dates must be selectable in the date picker, including past dates. If the application's existing due date is already in the past, saving with that past date (or any other past date) must be permitted without error. |
 | FR-ADDAPP-05 | Artifacts must be entered and stored as a discrete ordered list of strings, not as a single text field. |
-| FR-ADDAPP-19 | The Artifacts section must pre-populate with the following items in order: CV, Cover Letter, Research Statement, Teaching Philosophy, Teaching Portfolio, Letters of Recommendation, DEI Statement, Transcript. These defaults are fully editable — any pre-populated item may be removed, and new items may be added. |
+| FR-ADDAPP-19 | The Artifacts section must pre-populate with the following items in order: CV, Cover Letter, Research Statement, Teaching Philosophy, Teaching Dossier, Letters of Recommendation, EDI Statement, Writing Samples. These defaults are fully editable — any pre-populated item may be removed, and new items may be added. |
 | FR-ADDAPP-20 | The artifact text input and Add button must appear below the artifacts list. Newly added artifacts are appended to the bottom of the list, directly above the input row. |
 | FR-ADDAPP-12 | The form must include an optional Salary section with a Starting Salary field, a Maximum Salary field, and a currency selector. All three are optional as a group. The Salary section must appear above the Job Description field. |
 | FR-ADDAPP-13 | If both starting and maximum salary are provided, starting salary must be strictly less than maximum salary; otherwise the form must reject submission with an inline error. |
 | FR-ADDAPP-14 | If only one salary value is provided (starting or maximum), no cross-field validation is performed — the single value must be accepted without error. |
 | FR-ADDAPP-15 | Salary values must be stored as non-negative decimals. Non-numeric or negative inputs must be rejected with an inline error. |
-| FR-ADDAPP-16 | The currency selector must offer a fixed list of common currencies (e.g. CAD, USD, EUR, GBP, AUD, JPY) and default to CAD when the page loads. The selected currency is stored alongside the salary values. |
+| FR-ADDAPP-16 | The currency selector must offer a fixed list of common currencies (e.g. CAD, USD, EUR, GBP, AUD, JPY, KRW) and default to CAD when the page loads. The selected currency is stored alongside the salary values. |
 | FR-ADDAPP-17 | Each salary input must provide immediate inline validation feedback on blur and on Save — showing an error state for invalid values (negative or non-numeric) and clearing the error for acceptable values. The form must not be submitted while any salary field contains an invalid value. |
 | FR-ADDAPP-18 | On wide viewports, Starting Salary, Maximum Salary, and Currency must be laid out on a single row. On narrow viewports (mobile), the currency selector must wrap to a second row below the two salary inputs. |
 | FR-ADDAPP-22 | When editing an existing application, each artifact row must show a checkbox reflecting its current `completed` state loaded from the server. |

@@ -143,7 +143,7 @@ Renders a grouped section containing two `<input type="text" inputMode="numeric"
 
 Behaviour:
 - **Layout:** Starting Salary and Maximum Salary are on the left; Currency is to the right on the same row. When the viewport narrows and the row cannot fit all three controls, Currency wraps below the salary inputs.
-- Currency selector defaults to `"CAD"` on mount; other options: USD, EUR, GBP, AUD, JPY
+- Currency selector defaults to `"CAD"` on mount; other options: USD, EUR, GBP, AUD, JPY, KRW
 - Salary inputs use `type="text"` with `inputMode="numeric"` — the raw string is validated against `^\d+(\.\d+)?$`; anything that does not match (including letters, symbols, or negative signs) is treated as invalid
 - **Per-field validation** runs on blur of either salary input and when the form's Save action is triggered:
   - Negative or non-numeric value → field shown in error state with inline message; form blocked from submitting
