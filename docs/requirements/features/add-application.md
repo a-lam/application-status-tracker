@@ -17,12 +17,30 @@
 | # | Given | When | Then |
 |---|-------|------|------|
 | AC-20-1 | I am on the applications list page | I click `+ Add an application` | I am taken to the add application page |
-| AC-20-2 | I am on the add application page | The page loads | I see input fields for: Employer, Job Title, Due Date, Job Description, Salary, and Artifacts |
+| AC-20-2 | I am on the add application page | The page loads | I see input fields for: Employer, Job Title, Job Listing URL, Due Date, Job Description, Salary, and Artifacts |
 | AC-20-3 | I have filled in all required fields (Employer, Job Title, Due Date) | I click Save | The application is saved and I am returned to the applications list page where the new application appears |
 | AC-20-4 | I have left one or more required fields empty | I click Save | The form is not submitted, and each missing required field is highlighted with an error message |
 | AC-20-5 | I have filled in only the required fields and left optional fields empty | I click Save | The application is saved successfully — optional fields are stored as empty |
 | AC-20-6 | I am on the add application page | I click Cancel | No application is created and I am returned to the applications list page |
 | AC-20-7 | I am not signed in | I navigate directly to the add application page URL | I am redirected to the sign-in page |
+
+---
+
+### US-25 — Link to the job listing
+
+> As a user, I want to optionally record the URL of the job listing so that I can quickly revisit the original posting without searching for it again.
+
+**Acceptance criteria:**
+
+| # | Given | When | Then |
+|---|-------|------|------|
+| AC-25-1 | I am on the add application page | The page loads | I see an optional Job Listing URL field between Job Title and Due Date |
+| AC-25-2 | I leave the Job Listing URL field empty | I click Save | The application is saved successfully — the field is stored as null |
+| AC-25-3 | I enter a valid URL (starting with `http://` or `https://`) | I click Save | The application is saved with the URL |
+| AC-25-4 | I enter a value that is not a valid URL | I tab or click away from the field | The field is highlighted with an inline error message |
+| AC-25-5 | I enter a value that is not a valid URL | I click Save | The form is not submitted; the field is marked invalid with an inline error |
+| AC-25-6 | An application has a Job Listing URL | I view the application card | A "View Job Listing" link is visible on the card that opens the URL in a new tab |
+| AC-25-7 | An application has no Job Listing URL | I view the application card | No job listing link is rendered on the card |
 
 ---
 
@@ -132,6 +150,8 @@
 | FR-ADDAPP-09 | The API endpoint `POST /api/applications` must return HTTP 401 if the request has no valid session. |
 | FR-ADDAPP-10 | The API endpoint must return HTTP 422 with field-level error details if required fields are missing or invalid. |
 | FR-ADDAPP-11 | A Cancel control must be present on the page; activating it discards all form state and returns the user to the applications list page without creating a record. |
+| FR-ADDAPP-26 | The form must include an optional Job Listing URL field, positioned between Job Title and Due Date. The field accepts any string beginning with `http://` or `https://`; any other non-empty value must be rejected with an inline error on blur and on Save. An empty value is valid and stored as null. |
+| FR-ADDAPP-27 | When an application has a Job Listing URL, its card on the applications list page must display a "View Job Listing" link that opens the URL in a new browser tab (`target="_blank"` with `rel="noopener noreferrer"`). When the field is null the link must not be rendered. |
 
 ---
 

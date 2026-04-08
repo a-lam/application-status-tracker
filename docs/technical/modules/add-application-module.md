@@ -25,6 +25,7 @@ model Application {
   dueDate         DateTime
   employer        String
   jobTitle        String
+  jobListingUrl   String?
   jobDescription  String?
   salaryMin       Decimal?          @db.Decimal(12, 2)
   salaryMax       Decimal?          @db.Decimal(12, 2)
@@ -74,6 +75,7 @@ enum ApplicationStatus {
 - `@@unique([applicationId, label])` enforces the no-duplicate-artifact rule at the database level as a backstop to the client-side check
 - `salaryMin` and `salaryMax` are nullable `Decimal(12,2)` — both are optional; neither implies the other
 - `salaryCurrency` is a nullable `String` storing the ISO 4217 currency code (e.g. `"CAD"`); stored alongside the salary values and treated as optional if both salary fields are null
+- `jobListingUrl` is a nullable `String` storing the URL of the original job posting; validated on the server to begin with `http://` or `https://` when provided; stored as-is without normalisation
 
 ---
 
@@ -124,6 +126,7 @@ Lays out all fields and manages field-level validation state. Passes specialised
 |-------|-----------|----------|-------|
 | Employer | `<input type="text">` | Yes | |
 | Job Title | `<input type="text">` | Yes | |
+| Job Listing URL | `<input type="url">` | No | Must begin with `http://` or `https://` when provided; validated on blur and Save |
 | Due Date | `DatePickerField` | Yes | Calendar widget, today or future only |
 | Starting Salary | `SalaryFields` (text input, numeric keyboard) | No | Must be < Maximum Salary when both are provided; validated on blur and Save |
 | Maximum Salary | `SalaryFields` (text input, numeric keyboard) | No | Must be > Starting Salary when both are provided; validated on blur and Save |
@@ -198,6 +201,7 @@ The indicator is purely visual — it carries no `onChange` handler and cannot b
    {
      employer:        "Acme Corp",
      jobTitle:        "Senior Engineer",
+     jobListingUrl:   "https://example.com/jobs/123",  // optional, omitted if empty
      dueDate:         "2026-04-15",
      jobDescription:  "...",          // optional, omitted if empty
      salaryMin:       50000,          // optional, omitted if empty
@@ -212,6 +216,7 @@ The indicator is purely visual — it carries no `onChange` handler and cannot b
    b. Validates required fields (employer, jobTitle, dueDate) → 422 with errors if invalid
       Validates salary: if both salaryMin and salaryMax are present, salaryMin must be < salaryMax → 422 if violated
       Validates salary values: must be non-negative numbers if provided → 422 if violated
+      Validates jobListingUrl: if provided, must begin with `http://` or `https://` → 422 if violated
    c. Begins a Prisma transaction:
       i.  Creates Application record with userId from session
       ii. Creates one Artifact record per item in artifacts[], with order = array index
@@ -280,6 +285,7 @@ The indicator is purely visual — it carries no `onChange` handler and cannot b
 {
   "employer":        "string (required)",
   "jobTitle":        "string (required)",
+  "jobListingUrl":   "string (optional, must begin with http:// or https:// when provided)",
   "dueDate":         "YYYY-MM-DD (required, today or future)",
   "jobDescription":  "string (optional)",
   "salaryMin":       "number (optional, non-negative)",
@@ -297,7 +303,7 @@ The indicator is purely visual — it carries no `onChange` handler and cannot b
 |--------|-----------|
 | `201 Created` | Application created successfully; body contains the new application with its ID and artifacts |
 | `401 Unauthorized` | No valid session |
-| `422 Unprocessable Entity` | Required fields missing, `dueDate` is in the past, salary values are negative, or `salaryMin >= salaryMax` when both are provided |
+| `422 Unprocessable Entity` | Required fields missing, `dueDate` is in the past, salary values are negative, `salaryMin >= salaryMax` when both are provided, or `jobListingUrl` is provided but does not begin with `http://` or `https://` |
 
 ---
 

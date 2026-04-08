@@ -28,10 +28,11 @@ router.get("/applications/:id", requireAuth, async (req, res) => {
 
 // POST /api/applications — create a new application
 router.post("/applications", requireAuth, async (req, res) => {
-  const { employer, jobTitle, dueDate, jobDescription, artifacts = [], salaryMin, salaryMax, salaryCurrency } = req.body;
+  const { employer, jobTitle, jobListingUrl, dueDate, jobDescription, artifacts = [], salaryMin, salaryMax, salaryCurrency } = req.body;
 
   const parsedSalaryMin = salaryMin !== undefined && salaryMin !== null && salaryMin !== "" ? parseFloat(salaryMin) : null;
   const parsedSalaryMax = salaryMax !== undefined && salaryMax !== null && salaryMax !== "" ? parseFloat(salaryMax) : null;
+  const trimmedUrl = jobListingUrl?.trim() || null;
 
   const errors = {};
   if (!employer?.trim()) errors.employer = "Employer is required.";
@@ -47,6 +48,9 @@ router.post("/applications", requireAuth, async (req, res) => {
     } else if (due < today) {
       errors.dueDate = "Due date cannot be in the past.";
     }
+  }
+  if (trimmedUrl && !/^https?:\/\//i.test(trimmedUrl)) {
+    errors.jobListingUrl = "Please enter a valid URL (must start with http:// or https://).";
   }
   if (parsedSalaryMin !== null && (isNaN(parsedSalaryMin) || parsedSalaryMin < 0)) {
     errors.salary = "Starting salary must be a non-negative number.";
@@ -65,6 +69,7 @@ router.post("/applications", requireAuth, async (req, res) => {
       data: {
         employer: employer.trim(),
         jobTitle: jobTitle.trim(),
+        jobListingUrl: trimmedUrl,
         dueDate: new Date(dueDate),
         jobDescription: jobDescription?.trim() || null,
         salaryMin: parsedSalaryMin,
@@ -124,7 +129,7 @@ router.patch("/applications/:id/status", requireAuth, async (req, res) => {
 // PATCH /api/applications/:id — update application fields
 router.patch("/applications/:id", requireAuth, async (req, res) => {
   const { id } = req.params;
-  const { employer, jobTitle, dueDate, jobDescription, artifacts, salaryMin, salaryMax, salaryCurrency } = req.body;
+  const { employer, jobTitle, jobListingUrl, dueDate, jobDescription, artifacts, salaryMin, salaryMax, salaryCurrency } = req.body;
 
   const existing = await prisma.application.findUnique({ where: { id } });
   if (!existing) return res.status(404).json({ error: "Not found." });
@@ -132,6 +137,7 @@ router.patch("/applications/:id", requireAuth, async (req, res) => {
 
   const parsedSalaryMin = salaryMin !== undefined && salaryMin !== null && salaryMin !== "" ? parseFloat(salaryMin) : null;
   const parsedSalaryMax = salaryMax !== undefined && salaryMax !== null && salaryMax !== "" ? parseFloat(salaryMax) : null;
+  const trimmedUrl = jobListingUrl !== undefined ? (jobListingUrl?.trim() || null) : undefined;
 
   const errors = {};
   if (employer !== undefined && !employer?.trim()) errors.employer = "Employer is required.";
@@ -143,6 +149,9 @@ router.patch("/applications/:id", requireAuth, async (req, res) => {
       const due = new Date(dueDate);
       if (isNaN(due.getTime())) errors.dueDate = "Due date is invalid.";
     }
+  }
+  if (trimmedUrl && !/^https?:\/\//i.test(trimmedUrl)) {
+    errors.jobListingUrl = "Please enter a valid URL (must start with http:// or https://).";
   }
   if (salaryMin !== undefined || salaryMax !== undefined) {
     if (parsedSalaryMin !== null && (isNaN(parsedSalaryMin) || parsedSalaryMin < 0)) {
@@ -162,6 +171,7 @@ router.patch("/applications/:id", requireAuth, async (req, res) => {
     const updateData = {};
     if (employer !== undefined) updateData.employer = employer.trim();
     if (jobTitle !== undefined) updateData.jobTitle = jobTitle.trim();
+    if (trimmedUrl !== undefined) updateData.jobListingUrl = trimmedUrl;
     if (dueDate !== undefined) updateData.dueDate = new Date(dueDate);
     if (jobDescription !== undefined) updateData.jobDescription = jobDescription?.trim() || null;
     if (salaryMin !== undefined) updateData.salaryMin = parsedSalaryMin;

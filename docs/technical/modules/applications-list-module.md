@@ -70,6 +70,7 @@ Renders a single application's fields. Calls `getUrgencyBand(dueDate, status)` t
 - `KebabMenu` (`⋮` button) — top-right of the title row
 - Employer (directly below the title row — italicised, smaller font size)
 - Due Date (formatted with days-remaining suffix — see `formatDueDate` below)
+- Job Listing URL — only rendered when present; displayed as a `"View Job Listing →"` anchor element that opens the URL in a new tab (`target="_blank" rel="noopener noreferrer"`); the raw URL is not shown
 - Salary range — only rendered when at least one salary value is present; currency symbol precedes each amount, currency code follows at the end:
   - Both min and max: `[symbol][min]–[symbol][max] [code]` e.g. "$80,000–$120,000 CAD"
   - Min only: `[symbol][min]+ [code]` e.g. "$80,000+ CAD"

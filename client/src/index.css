@@ -488,6 +488,12 @@ body {
   white-space: nowrap;
 }
 
+.app-card__listing-link {
+  display: inline-block;
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
 .app-card__salary {
   font-size: 0.875rem;
   color: var(--text-2);

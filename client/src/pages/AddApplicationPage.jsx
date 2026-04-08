@@ -18,6 +18,7 @@ const DEFAULT_ARTIFACTS = [
 const INITIAL_FORM = {
   employer: "",
   jobTitle: "",
+  jobListingUrl: "",
   dueDate: "",
   jobDescription: "",
   salaryMin: "",

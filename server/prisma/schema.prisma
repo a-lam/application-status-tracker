@@ -79,6 +79,7 @@ model Application {
   dueDate        DateTime
   employer       String
   jobTitle       String
+  jobListingUrl  String?
   jobDescription String?
   salaryMin      Decimal?          @db.Decimal(12, 2)
   salaryMax      Decimal?          @db.Decimal(12, 2)

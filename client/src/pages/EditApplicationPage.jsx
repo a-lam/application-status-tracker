@@ -25,6 +25,7 @@ export default function EditApplicationPage() {
         setFormData({
           employer: app.employer,
           jobTitle: app.jobTitle,
+          jobListingUrl: app.jobListingUrl ?? "",
           dueDate: app.dueDate.slice(0, 10),
           jobDescription: app.jobDescription ?? "",
           salaryMin: app.salaryMin != null ? String(app.salaryMin) : "",

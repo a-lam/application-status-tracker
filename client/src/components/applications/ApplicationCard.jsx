@@ -81,6 +81,18 @@ export default function ApplicationCard({ application, onStatusUpdate, onDeleteR
         <span className="app-card__due">Due: {formatDueDate(application.dueDate)}</span>
       </div>
 
+      {application.jobListingUrl && (
+        <a
+          className="app-card__listing-link"
+          href={application.jobListingUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          View Job Listing →
+          <span className="sr-only"> for {application.jobTitle} at {application.employer}</span>
+        </a>
+      )}
+
       {salaryDisplay && (
         <div className="app-card__salary">{salaryDisplay}</div>
       )}

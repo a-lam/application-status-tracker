@@ -64,7 +64,9 @@
 
 | # | Given | When | Then |
 |---|-------|------|------|
-| AC-12-1 | An application exists | The page renders | Each application card displays: Job Title with submission status in parentheses, Employer (below the title, italicised and smaller), Due Date, Salary (if present), Job Description, and a collapsible Artifacts panel |
+| AC-12-1 | An application exists | The page renders | Each application card displays: Job Title with submission status in parentheses, Employer (below the title, italicised and smaller), Due Date, Job Listing URL link (if present), Salary (if present), Job Description, and a collapsible Artifacts panel |
+| AC-12-16 | An application has a Job Listing URL | The page renders | A "View Job Listing →" link is shown on the card; clicking it opens the URL in a new browser tab |
+| AC-12-17 | An application has no Job Listing URL | The page renders | No job listing link is rendered on the card |
 | AC-12-2 | An application has a long job description | The page renders | The description is truncated after 6 lines with a "show more" control that reveals the full text |
 | AC-12-3 | An application has a short job description that fits within 6 lines | The page renders | The full description is shown with no "show more" control visible |
 | AC-12-4 | An application's due date is in the future | The page renders | The due date is displayed as `D Mon YYYY (N days away)`, e.g. "21 May 2026 (50 days away)" |

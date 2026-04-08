@@ -133,6 +133,7 @@ Clicking outside the open menu closes it without taking any action.
 │ │ bgcolor: light red                               │   │
 │ │  Senior Frontend Engineer (Not Submitted)    [⋮] │   │
 │ │  Acme Corp              Due: 29 Mar 2026          │   │
+│ │  View Job Listing →                              │   │
 │ │  $90,000–$120,000 CAD                            │   │
 │ │                                                  │   │
 │ │  Job Description:                                │   │
@@ -313,6 +314,7 @@ Each card consistently presents fields in the same order:
 ┌──────────────────────────────────────────────────┐
 │  [Job Title] ([Status])                      [⋮] │
 │  [Employer — italic, smaller]   Due: [date str]   │
+│  [View Job Listing →]  ← only rendered when present │
 │  [Salary range — omitted when no salary present]  │
 │                                                   │
 │  Job Description:                                 │
@@ -342,6 +344,10 @@ Expanded:
 - Past due: `D Mon YYYY` — e.g. "10 Mar 2026"
 - Due today: `D Mon YYYY (Today)` — e.g. "1 Apr 2026 (Today)"
 - Future: `D Mon YYYY (N days away)` — e.g. "20 Apr 2026 (19 days away)"
+
+**Job Listing URL display:**
+- When present: rendered as a `"View Job Listing →"` link directly below the due date line, above the salary line; opens in a new browser tab
+- When absent: the link is not rendered at all
 
 **Salary display:**
 - Currency symbol precedes each amount; currency code follows at the end
@@ -375,4 +381,5 @@ Expanded:
 - The artifact list container must have `role="list"` and each row must be `role="listitem"` so screen readers announce the structure correctly
 - All interactive controls (kebab trigger buttons, artifacts panel toggle, add-application button) must have a minimum touch target size of 44 × 44 px
 - All CSS transitions must be disabled when `prefers-reduced-motion: reduce` is set at the OS level
+- The "View Job Listing →" link must include `rel="noopener noreferrer"` when `target="_blank"` is set, and must have a visually-hidden screen-reader supplement if the link text alone is not sufficiently descriptive in context (e.g. `<span class="sr-only"> for [Job Title] at [Employer]</span>`)
 - Secondary text within cards (employer name, status, description label, artifacts arrow) must achieve a contrast ratio of at least 4.5:1 against all urgency-band backgrounds. This is enforced by scoping `--text-3` to `#4b5563` within `.app-card`

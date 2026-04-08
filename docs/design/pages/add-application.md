@@ -68,10 +68,17 @@ The add application page is where a user records a new job application they want
 - If only one salary value is entered, no cross-field error is shown
 - If both salary values are entered and Starting Salary ≥ Maximum Salary, an inline error appears on blur or on Save attempt: _"Starting salary must be less than maximum salary"_
 
+### Job Listing URL field
+
+- The Job Listing URL field is optional and sits between Job Title and Due Date
+- On blur and on Save, if a non-empty value is present that does not begin with `http://` or `https://`, the field is shown in an error state with the message "Please enter a valid URL (must start with http:// or https://)"
+- An empty value is always valid — no error is shown
+- A valid URL clears any existing error state immediately on blur
+
 ### Validation
 
 - Clicking Save with missing required fields highlights each missing field with an inline error and moves focus to the first problem
-- The form is not submitted until all required fields are filled
+- The form is not submitted until all required fields are filled and all optional fields with values pass validation (including Job Listing URL)
 
 ### Cancel
 
@@ -102,6 +109,11 @@ If the user's session expires while they are filling in this form, they are auto
 │  Job Title *                                           │
 │  ┌──────────────────────────────────────────────────┐ │
 │  │                                                  │ │
+│  └──────────────────────────────────────────────────┘ │
+│                                                        │
+│  Job Listing URL                                       │
+│  ┌──────────────────────────────────────────────────┐ │
+│  │  https://                                        │ │
 │  └──────────────────────────────────────────────────┘ │
 │                                                        │
 │  Due Date *                                            │
@@ -309,3 +321,4 @@ If the user's session expires while they are filling in this form, they are auto
 - The calendar widget must be keyboard navigable (arrow keys to move between dates, Enter to select, Escape to close)
 - The artifact Add button must be operable via keyboard (Enter / Space) without relying on clicking the input
 - Each `ArtifactItem` remove button must have `aria-label="Remove [artifact name]"` so it is distinguishable to screen readers
+- The Job Listing URL field must use `<input type="url">` with `aria-describedby` linking to its inline error message when in an error state
