@@ -356,6 +356,7 @@ body {
 
 .field input[type="text"],
 .field input[type="email"],
+.field input[type="url"],
 .field input[type="number"],
 .field textarea,
 .field select {
@@ -372,6 +373,7 @@ body {
 @media (prefers-reduced-motion: no-preference) {
   .field input[type="text"],
   .field input[type="email"],
+  .field input[type="url"],
   .field input[type="number"],
   .field textarea,
   .field select {
@@ -381,6 +383,7 @@ body {
 
 .field input[type="text"]:focus,
 .field input[type="email"]:focus,
+.field input[type="url"]:focus,
 .field input[type="number"]:focus,
 .field textarea:focus,
 .field select:focus {
