@@ -28,11 +28,13 @@ router.get("/applications/:id", requireAuth, async (req, res) => {
 
 // POST /api/applications — create a new application
 router.post("/applications", requireAuth, async (req, res) => {
-  const { employer, jobTitle, jobListingUrl, dueDate, jobDescription, artifacts = [], salaryMin, salaryMax, salaryCurrency } = req.body;
+  const { employer, jobTitle, jobListingUrl, dueDate, jobDescription, artifacts = [], salaryMin, salaryMax, salaryCurrency, jobStartDate, jobStartText } = req.body;
 
   const parsedSalaryMin = salaryMin !== undefined && salaryMin !== null && salaryMin !== "" ? parseFloat(salaryMin) : null;
   const parsedSalaryMax = salaryMax !== undefined && salaryMax !== null && salaryMax !== "" ? parseFloat(salaryMax) : null;
   const trimmedUrl = jobListingUrl?.trim() || null;
+  const trimmedJobStartText = jobStartText?.trim() || null;
+  const parsedJobStartDate = jobStartDate ? new Date(jobStartDate) : null;
 
   const errors = {};
   if (!employer?.trim()) errors.employer = "Employer is required.";
@@ -59,6 +61,9 @@ router.post("/applications", requireAuth, async (req, res) => {
   } else if (parsedSalaryMin !== null && parsedSalaryMax !== null && parsedSalaryMin >= parsedSalaryMax) {
     errors.salary = "Starting salary must be less than maximum salary.";
   }
+  if (parsedJobStartDate !== null && trimmedJobStartText !== null) {
+    errors.jobStart = "Only one of jobStartDate or jobStartText may be provided.";
+  }
 
   if (Object.keys(errors).length > 0) {
     return res.status(422).json({ errors });
@@ -75,6 +80,8 @@ router.post("/applications", requireAuth, async (req, res) => {
         salaryMin: parsedSalaryMin,
         salaryMax: parsedSalaryMax,
         salaryCurrency: parsedSalaryMin !== null || parsedSalaryMax !== null ? (salaryCurrency || "CAD") : null,
+        jobStartDate: parsedJobStartDate,
+        jobStartText: trimmedJobStartText,
         status: "NOT_SUBMITTED",
         userId: req.user.id,
       },
@@ -129,7 +136,7 @@ router.patch("/applications/:id/status", requireAuth, async (req, res) => {
 // PATCH /api/applications/:id — update application fields
 router.patch("/applications/:id", requireAuth, async (req, res) => {
   const { id } = req.params;
-  const { employer, jobTitle, jobListingUrl, dueDate, jobDescription, artifacts, salaryMin, salaryMax, salaryCurrency } = req.body;
+  const { employer, jobTitle, jobListingUrl, dueDate, jobDescription, artifacts, salaryMin, salaryMax, salaryCurrency, jobStartDate, jobStartText } = req.body;
 
   const existing = await prisma.application.findUnique({ where: { id } });
   if (!existing) return res.status(404).json({ error: "Not found." });
@@ -138,6 +145,8 @@ router.patch("/applications/:id", requireAuth, async (req, res) => {
   const parsedSalaryMin = salaryMin !== undefined && salaryMin !== null && salaryMin !== "" ? parseFloat(salaryMin) : null;
   const parsedSalaryMax = salaryMax !== undefined && salaryMax !== null && salaryMax !== "" ? parseFloat(salaryMax) : null;
   const trimmedUrl = jobListingUrl !== undefined ? (jobListingUrl?.trim() || null) : undefined;
+  const trimmedJobStartText = jobStartText !== undefined ? (jobStartText?.trim() || null) : undefined;
+  const parsedJobStartDate = jobStartDate !== undefined ? (jobStartDate ? new Date(jobStartDate) : null) : undefined;
 
   const errors = {};
   if (employer !== undefined && !employer?.trim()) errors.employer = "Employer is required.";
@@ -162,6 +171,13 @@ router.patch("/applications/:id", requireAuth, async (req, res) => {
       errors.salary = "Starting salary must be less than maximum salary.";
     }
   }
+  if (jobStartDate !== undefined && jobStartText !== undefined) {
+    const effectiveDate = parsedJobStartDate;
+    const effectiveText = trimmedJobStartText;
+    if (effectiveDate !== null && effectiveText !== null) {
+      errors.jobStart = "Only one of jobStartDate or jobStartText may be provided.";
+    }
+  }
 
   if (Object.keys(errors).length > 0) {
     return res.status(422).json({ errors });
@@ -181,6 +197,8 @@ router.patch("/applications/:id", requireAuth, async (req, res) => {
       const effectiveMax = salaryMax !== undefined ? parsedSalaryMax : existing.salaryMax;
       updateData.salaryCurrency = effectiveMin !== null || effectiveMax !== null ? (salaryCurrency || existing.salaryCurrency || "CAD") : null;
     }
+    if (parsedJobStartDate !== undefined) updateData.jobStartDate = parsedJobStartDate;
+    if (trimmedJobStartText !== undefined) updateData.jobStartText = trimmedJobStartText;
 
     await tx.application.update({ where: { id }, data: updateData });
 

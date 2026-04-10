@@ -31,6 +31,8 @@ export default function EditApplicationPage() {
           salaryMin: app.salaryMin != null ? String(app.salaryMin) : "",
           salaryMax: app.salaryMax != null ? String(app.salaryMax) : "",
           salaryCurrency: app.salaryCurrency ?? "CAD",
+          jobStartDate: app.jobStartDate ? app.jobStartDate.slice(0, 10) : "",
+          jobStartText: app.jobStartText ?? "",
           artifacts: app.artifacts.map((a) => a.label),
         });
       } catch {

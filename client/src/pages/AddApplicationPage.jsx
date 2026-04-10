@@ -24,6 +24,8 @@ const INITIAL_FORM = {
   salaryMin: "",
   salaryMax: "",
   salaryCurrency: "CAD",
+  jobStartDate: "",
+  jobStartText: "",
   artifacts: DEFAULT_ARTIFACTS,
 };
 

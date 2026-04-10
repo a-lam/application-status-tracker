@@ -1,6 +1,6 @@
 # Feature: Applications List
 
-> **Last updated:** 2026-04-10
+> **Last updated:** 2026-04-10 (consistent label styling: Salary, Job Start, and Job Description labels all use the same small bold uppercase style)
 > **Status:** Implemented
 > **Default page:** This is the default destination for all signed-in users. Any unauthenticated visit to the app root redirects to the login page.
 
@@ -63,7 +63,7 @@
 
 | # | Given | When | Then |
 |---|-------|------|------|
-| AC-12-1 | An application exists | The page renders | Each application card displays: Job Title with submission status in parentheses, Employer (below the title, italicised and smaller), Due Date, Job Listing URL link (if present), Salary (if present), Job Description, and a collapsible Artifacts panel |
+| AC-12-1 | An application exists | The page renders | Each application card displays: a top row containing a title-group (Job Title with submission status in parentheses, with Employer italicised directly below the title) on the left, Due Date immediately left of the kebab on the right; then below the row: Job Listing URL link (if present), Job Start (if present, directly below the listing link), Salary (if present, prefixed with a "Salary:" label), Job Description, and a collapsible Artifacts panel |
 | AC-12-16 | An application has a Job Listing URL | The page renders | A "View Job Listing →" link is shown on the card; clicking it opens the URL in a new browser tab |
 | AC-12-17 | An application has no Job Listing URL | The page renders | No job listing link is rendered on the card |
 | AC-12-2 | An application has a long job description | The page renders | The description is truncated after 6 lines with a "show more" control that reveals the full text |
@@ -80,10 +80,13 @@
 | AC-12-13 | An application's status is `OFFER_DECLINED` | The page renders | The job title line reads "Job Title (Offer Declined)" |
 | AC-12-14 | An application's status is `REJECTED` | The page renders | The job title line reads "Job Title (Rejected)" |
 | AC-12-15 | An application's status is `WITHDRAWN` | The page renders | The job title line reads "Job Title (Withdrawn)" |
-| AC-12-10 | An application has both a starting salary and a maximum salary | The page renders | The salary range is displayed as `[symbol][min]–[symbol][max] [code]`, e.g. "$80,000–$120,000 CAD" |
-| AC-12-11 | An application has only a starting salary | The page renders | The salary is displayed as `[symbol][min]+ [code]`, e.g. "$80,000+ CAD" |
-| AC-12-12 | An application has only a maximum salary | The page renders | The salary is displayed as `up to [symbol][max] [code]`, e.g. "up to $120,000 CAD" |
+| AC-12-10 | An application has both a starting salary and a maximum salary | The page renders | The salary is displayed as `SALARY: [symbol][min]–[symbol][max] [code]` on one line, e.g. "SALARY: $80,000–$120,000 CAD" |
+| AC-12-11 | An application has only a starting salary | The page renders | The salary is displayed as `SALARY: [symbol][min]+ [code]` on one line, e.g. "SALARY: $80,000+ CAD" |
+| AC-12-12 | An application has only a maximum salary | The page renders | The salary is displayed as `SALARY: up to [symbol][max] [code]` on one line, e.g. "SALARY: up to $120,000 CAD" |
 | AC-12-13 | An application has no salary values | The page renders | No salary line is shown on the card |
+| AC-12-18 | An application has a `jobStartDate` | The page renders | The card displays `JOB START: D Mon YYYY` on one line (e.g. `JOB START: 1 Sep 2026`) directly below the "View Job Listing →" link (or directly below the employer if no listing link is present) |
+| AC-12-19 | An application has a `jobStartText` | The page renders | The card displays `JOB START: <text>` on one line (e.g. `JOB START: Fall 2026`) directly below the "View Job Listing →" link (or directly below the employer if no listing link is present) |
+| AC-12-20 | An application has neither `jobStartDate` nor `jobStartText` | The page renders | No Job Start line is rendered on the card |
 
 ---
 
@@ -240,7 +243,7 @@
 | FR-APPS-08 | When a user has no applications, the page must display an empty state rather than a blank or broken layout. |
 | FR-APPS-10 | The due date display must append a days-remaining suffix for future dates (e.g. "(17 days away)"), show "(Today)" when the due date is today, and show the date alone when the due date is in the past. |
 | FR-APPS-11 | The "show more" control on job descriptions must only appear when the description content actually overflows 6 lines — it must not render when the full description fits within 6 lines. |
-| FR-APPS-19 | If an application has salary data, the card must display it with the currency symbol before each amount and the currency code after. The format depends on which values are present: both min and max → `[symbol][min]–[symbol][max] [code]`; min only → `[symbol][min]+ [code]`; max only → `up to [symbol][max] [code]`. If neither salary value is present, no salary line is rendered. The currency symbol must reflect the stored currency code (e.g. $ for CAD/USD, € for EUR, £ for GBP, $ for AUD, ¥ for JPY). |
+| FR-APPS-19 | If an application has salary data, the card must display a "SALARY:" inline label (small, bold, uppercase — same visual style as other card labels) immediately followed by the salary value on the same line. The value format depends on which values are present: both min and max → `[symbol][min]–[symbol][max] [code]`; min only → `[symbol][min]+ [code]`; max only → `up to [symbol][max] [code]`. If neither salary value is present, no salary line is rendered. The currency symbol must reflect the stored currency code (e.g. $ for CAD/USD, € for EUR, £ for GBP, $ for AUD, ¥ for JPY). |
 | FR-APPS-12 | Each application card must expose a kebab (`⋮`) menu with three actions: Update Status, Edit Application, and Delete Application. |
 | FR-APPS-13 | The "Update Status ▶" item in the kebab menu must open a submenu listing only the statuses that are valid to transition to from the application's current status (see US-ST for the full transition table). For terminal-state applications the submenu shows a single option labelled "Reset to Not Submitted". Selecting a status from the submenu must update the application immediately with no confirmation prompt, close both menus, and update the job title line in place without a full page reload. After a successful status change, an `aria-live="polite"` region must announce the result to screen readers (e.g. "Software Engineer at Acme marked as Interviewing."). The server must enforce the transition rules and return HTTP 422 with `{ "error": "Invalid status transition." }` if the requested transition is not permitted from the application's current status. |
 | FR-APPS-14 | The Edit Application action must navigate to a pre-filled edit form at `/applications/:id/edit`; on save the user returns to the list with updated data. |
@@ -255,6 +258,7 @@
 | FR-APPS-24 | The API endpoint for toggling artifact completion must verify that the artifact's parent application belongs to the requesting user — HTTP 403 if not. |
 | FR-APPS-25 | Interactive touch targets (kebab trigger buttons, artifacts panel toggle) must have a minimum hit area of 44 × 44 px to meet mobile usability standards. |
 | FR-APPS-26 | All CSS transitions must be suppressed when the user's operating system has `prefers-reduced-motion` set to `reduce`. |
+| FR-APPS-27 | The card top row contains a title-group (flex column: Job Title on top, Employer italicised directly below) that fills available width, with the `Due:` date immediately to its right and the kebab menu rightmost. This grouping ensures Employer is always visually adjacent to Job Title regardless of the kebab's touch-target height. Job Start is displayed below the "View Job Listing →" link (or below the top row if no listing link is present). A specific date (`jobStartDate`) is formatted as `D Mon YYYY` (e.g. `1 Sep 2026`). Approximate text (`jobStartText`) is shown as-is. The display label **"JOB START:"** is rendered as a small, bold, uppercase inline label immediately followed by the value on the same line. If neither `jobStartDate` nor `jobStartText` is set, no Job Start line is rendered. |
 
 ---
 

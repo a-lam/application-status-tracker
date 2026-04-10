@@ -106,14 +106,13 @@ export default function SharedApplicationCard({ application }) {
       aria-label={`Application: ${application.jobTitle} at ${application.employer}`}
     >
       <div className="app-card__row1">
-        <span className="app-card__title">
-          {application.jobTitle}{" "}
-          <span className="app-card__status">({statusLabel})</span>
-        </span>
-      </div>
-
-      <div className="app-card__header">
-        <div className="app-card__employer">{application.employer}</div>
+        <div className="app-card__title-group">
+          <span className="app-card__title">
+            {application.jobTitle}{" "}
+            <span className="app-card__status">({statusLabel})</span>
+          </span>
+          <div className="app-card__employer">{application.employer}</div>
+        </div>
         <span className="app-card__due">Due: {formatDueDate(application.dueDate)}</span>
       </div>
 
@@ -129,7 +128,21 @@ export default function SharedApplicationCard({ application }) {
         </a>
       )}
 
-      {salaryDisplay && <div className="app-card__salary">{salaryDisplay}</div>}
+      {(application.jobStartDate || application.jobStartText) && (
+        <div className="app-card__job-start">
+          <span className="app-card__inline-label">Job Start:</span>
+          {application.jobStartDate
+            ? format(new Date(application.jobStartDate), "d MMM yyyy")
+            : application.jobStartText}
+        </div>
+      )}
+
+      {salaryDisplay && (
+        <div className="app-card__salary">
+          <span className="app-card__inline-label">Salary:</span>
+          {salaryDisplay}
+        </div>
+      )}
 
       {hasDescription && (
         <div className="app-card__description">

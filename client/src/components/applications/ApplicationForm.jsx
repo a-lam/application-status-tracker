@@ -14,6 +14,9 @@ export default function ApplicationForm({
   artifactObjects,
 }) {
   const [validationErrors, setValidationErrors] = useState({});
+  const [jobStartMode, setJobStartMode] = useState(
+    formData.jobStartDate ? "specific" : "approximate"
+  );
   const employerRef = useRef(null);
   const jobTitleRef = useRef(null);
   const jobListingUrlRef = useRef(null);
@@ -169,10 +172,10 @@ export default function ApplicationForm({
         )}
       </div>
 
-      {/* Due Date */}
+      {/* Application Due Date */}
       <div className="field" ref={dueDateRef}>
         <label htmlFor="due-date">
-          Due Date <span aria-hidden="true">*</span>
+          Application Due Date <span aria-hidden="true">*</span>
         </label>
         <DatePickerField
           id="due-date"
@@ -181,6 +184,58 @@ export default function ApplicationForm({
           error={errors.dueDate}
           disablePast={disablePast}
         />
+      </div>
+
+      {/* Job Start */}
+      <div className="field">
+        <label>Job Start</label>
+        <div className="segmented-toggle" role="group" aria-label="Job start type">
+          <button
+            type="button"
+            className={`segmented-toggle__option${jobStartMode === "approximate" ? " segmented-toggle__option--active" : ""}`}
+            onClick={() => {
+              if (jobStartMode !== "approximate") {
+                setJobStartMode("approximate");
+                onChange("jobStartDate", "");
+                onChange("jobStartText", "");
+              }
+            }}
+            disabled={submitting}
+          >
+            Approximate
+          </button>
+          <button
+            type="button"
+            className={`segmented-toggle__option${jobStartMode === "specific" ? " segmented-toggle__option--active" : ""}`}
+            onClick={() => {
+              if (jobStartMode !== "specific") {
+                setJobStartMode("specific");
+                onChange("jobStartDate", "");
+                onChange("jobStartText", "");
+              }
+            }}
+            disabled={submitting}
+          >
+            Specific date
+          </button>
+        </div>
+        {jobStartMode === "approximate" ? (
+          <input
+            id="job-start-text"
+            type="text"
+            value={formData.jobStartText ?? ""}
+            onChange={(e) => onChange("jobStartText", e.target.value)}
+            placeholder="e.g. Fall 2026, Winter Term 2027"
+            disabled={submitting}
+          />
+        ) : (
+          <DatePickerField
+            id="job-start-date"
+            value={formData.jobStartDate ?? ""}
+            onChange={(val) => onChange("jobStartDate", val)}
+            disablePast={disablePast}
+          />
+        )}
       </div>
 
       {/* Salary */}
