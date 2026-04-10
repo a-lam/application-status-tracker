@@ -1,6 +1,6 @@
 # Page: Applications List
 
-> **Last updated:** 2026-04-10
+> **Last updated:** 2026-04-10 (responsive desktop scaling; mobile due-date position; mobile email visibility)
 > **Feature requirements:** [requirements/features/applications-list.md](../../requirements/features/applications-list.md)
 > **Technical module:** [technical/modules/applications-list-module.md](../../technical/modules/applications-list-module.md)
 
@@ -108,7 +108,7 @@ If the user's session expires while they are on this page, they are automaticall
 
 ### Page menu (top-right `⋮`)
 
-The page header contains the authenticated user's email address (hidden on mobile viewports ≤ 480 px) displayed as plain text, immediately followed by a `⋮` (three-dot vertical) icon in the top-right corner. Clicking the icon opens a small dropdown with:
+The page header contains the authenticated user's email address displayed as plain text, immediately followed by a `⋮` (three-dot vertical) icon in the top-right corner. The email is visible at all viewport widths; on narrow mobile viewports (≤ 480 px) it is capped to the available space and truncated with an ellipsis rather than hidden. Clicking the icon opens a small dropdown with:
 
 1. **Dark Mode / Light Mode** — toggles between light and dark mode; the label reads "Dark Mode" when the app is in light mode and "Light Mode" when in dark mode
 2. **Logout** — ends the user's session server-side and redirects to the sign-in page
@@ -216,16 +216,16 @@ Clicking outside the open menu closes it without taking any action.
 
 ```
 ┌────────────────────────────────┐
-│  [+]                      [⋮]  │  ← email hidden; button collapses to "+"
+│  [+]      andy@example…   [⋮]  │  ← email truncated with ellipsis if too long; button collapses to "+"
 ├────────────────────────────────┤
 │ ┌──────────────────────────┐   │
 │ │ bgcolor: light red       │   │
 │ │  Senior Frontend         │   │
 │ │  Engineer                │   │
-│ │  Due: 3 Apr 2026     [⋮] │   │  ← due + kebab vertically centered; wrap onto next line on mobile
-│ │  (2 days away)           │   │
 │ │  Acme Corp               │   │
-│ │  [Submitted]             │   │  ← status badge, blue pill
+│ │  Due: 3 Apr 2026         │   │  ← due date moves under employer; kebab stays top-right
+│ │  (2 days away)           │   │
+│ │  [Submitted]         [⋮] │   │  ← status badge, blue pill; kebab vertically centered in actions col
 │ │  ───────────────────     │   │  ← separator
 │ │  $90,000–$120,000 CAD    │   │
 │ │                          │   │
@@ -379,7 +379,8 @@ Expanded:
 
 **Status display:**
 - Rendered as a small pill/badge positioned below the employer line inside `.app-card__title-group`
-- Order within title group: Job Title → Employer → Status badge
+- Order within title group (desktop): Job Title → Employer → Status badge
+- Order within title group (mobile ≤ 480 px): Job Title → Employer → Due date → Status badge (due date moves here from the actions column so the title is not squeezed)
 - Badge colour reflects the application status — see [Status badge colours](#status-badge-colours) above
 - Full enum-to-label mapping: see [Application Status](#application-status) table above
 
@@ -407,6 +408,19 @@ Expanded:
 - Inline metadata labels (SALARY:, JOB START:): `0.8125rem`, bold, uppercase — raised from `0.75rem` for legibility
 - Description body text: `color: var(--text)` — full-contrast primary text colour, not `var(--text-2)`, to ensure readability against all urgency-band backgrounds
 
+**Responsive scaling (≥ 900 px):**
+
+At viewports 900 px wide and wider the card container expands from 760 px to 900 px and all card text scales up by ~1.18×:
+
+| Element | Default | ≥ 900 px |
+|---|---|---|
+| Page / section heading | `1.5rem` | `1.75rem` |
+| Card padding | `1.1rem 1.25rem` | `1.3rem 1.5rem` |
+| Job title | `1.0625rem` | `1.25rem` |
+| Employer / due / job-start / listing link / salary / description | `0.875rem` | `1.025rem` |
+| Description label / inline metadata labels | `0.75rem` | `0.875rem` |
+| Card list gap | `0.875rem` | `1rem` |
+
 ---
 
 ## Accessibility Notes
@@ -414,7 +428,7 @@ Expanded:
 - Each card must have a descriptive `aria-label` (e.g. "Application: Senior Frontend Engineer at Acme Corp")
 - Colour alone must not be the only indicator of urgency — the days-remaining text in the due date (e.g. "(3 days away)", "(Today)") provides a secondary, non-colour cue for users with colour vision deficiency
 - The add-application button carries `aria-label="Add an application"` at all viewport widths. Both the full-text span and the compact `+` span are `aria-hidden`; the accessible name comes entirely from the `aria-label`
-- The user email in the header is presentational (`aria-hidden="true"`); it must not receive keyboard focus and does not require an interactive role. It is hidden at mobile viewports (≤ 480 px) via CSS
+- The user email in the header is presentational (`aria-hidden="true"`); it must not receive keyboard focus and does not require an interactive role. It is visible at all viewport widths; on ≤ 480 px it truncates with an ellipsis rather than disappearing
 - The page-level `⋮` button must have `aria-label="Page options"` and must manage `aria-expanded` and `aria-haspopup="menu"`; clicking outside must close the menu without taking any action
 - The per-card kebab `⋮` button must have an `aria-label` identifying the application (e.g. "Options for Senior Frontend Engineer at Acme Corp") and must manage `aria-expanded` and `aria-haspopup="menu"`
 - Each menu item inside the kebab dropdown must be a `role="menuitem"` element; the dropdown itself must be `role="menu"`

@@ -82,10 +82,11 @@ export default function ApplicationCard({ application, onStatusUpdate, onDeleteR
         <div className="app-card__title-group">
           <span className="app-card__title">{application.jobTitle}</span>
           <div className="app-card__employer">{application.employer}</div>
+          <span className="app-card__due app-card__due--mobile">Due: {formatDueDate(application.dueDate)}</span>
           <span className={`status-badge ${statusBadgeClass}`}>{statusLabel}</span>
         </div>
         <div className="app-card__actions">
-          <span className="app-card__due">Due: {formatDueDate(application.dueDate)}</span>
+          <span className="app-card__due app-card__due--desktop">Due: {formatDueDate(application.dueDate)}</span>
           {!readOnly && (
             <KebabMenu
               application={application}

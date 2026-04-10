@@ -187,6 +187,7 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  min-width: 0;
 }
 
 .page-loading {
@@ -628,6 +629,8 @@ body {
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+.app-card__due--mobile { display: none; }
 
 .app-card__meta {
   border-top: 1px solid rgba(0,0,0,0.07);
@@ -1149,6 +1152,44 @@ body {
   box-shadow: var(--s-sm);
 }
 
+/* ── Large desktop scaling (≥ 900px) ────────────────────────────────────────── */
+@media (min-width: 900px) {
+  .page {
+    max-width: 900px;
+  }
+
+  .page > h1,
+  .page-header h1 {
+    font-size: 1.75rem;
+  }
+
+  .app-card {
+    padding: 1.3rem 1.5rem;
+  }
+
+  .app-card__title {
+    font-size: 1.25rem;
+  }
+
+  .app-card__employer,
+  .app-card__due,
+  .app-card__job-start,
+  .app-card__listing-link,
+  .app-card__salary,
+  .app-card__description {
+    font-size: 1.025rem;
+  }
+
+  .app-card__description-label,
+  .app-card__inline-label {
+    font-size: 0.875rem;
+  }
+
+  .app-list {
+    gap: 1rem;
+  }
+}
+
 /* ── Mobile overrides (≤ 480px) ─────────────────────────────────────────────── */
 @media (max-width: 480px) {
   /* Add application button collapses to "+" */
@@ -1161,12 +1202,17 @@ body {
     min-height: 44px;
   }
 
-  /* Hide user email to prevent header crowding */
-  .page-header__user-email { display: none; }
+  /* Let email fill available space and truncate only when truly squeezed */
+  .page-header__right { min-width: 0; overflow: hidden; }
+  .page-header__user-email { max-width: none; flex: 1; }
 
-  /* Allow due date and job start to wrap on small screens */
-  .app-card__row1 { flex-wrap: wrap; }
-  .app-card__due { white-space: normal; }
+  /* Move due date under employer on narrow screens */
+  .app-card__due--desktop { display: none; }
+  .app-card__due--mobile {
+    display: block;
+    white-space: normal;
+    margin-bottom: 0.25rem;
+  }
 
   /* Tighter dialog padding */
   .dialog { padding: 1.25rem; }
