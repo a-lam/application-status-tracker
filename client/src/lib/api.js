@@ -70,3 +70,44 @@ export function updateArtifactCompleted(id, completed) {
     body: JSON.stringify({ completed }),
   });
 }
+
+export function getShares() {
+  return apiFetch("/api/shares");
+}
+
+export function createShare(email) {
+  return apiFetch("/api/shares", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
+}
+
+export function deleteShare(id) {
+  return apiFetch(`/api/shares/${id}`, { method: "DELETE" });
+}
+
+// Returns { status, data } — does not auto-redirect on 401
+async function sharedFetch(path, options = {}) {
+  const res = await fetch(path, {
+    ...options,
+    credentials: "include",
+    headers: { "Content-Type": "application/json", ...options.headers },
+  });
+  const data = res.status !== 204 ? await res.json().catch(() => null) : null;
+  return { status: res.status, data };
+}
+
+export function requestCode(token) {
+  return sharedFetch(`/api/shared/${token}/request-code`, { method: "POST" });
+}
+
+export function verifyCode(token, code) {
+  return sharedFetch(`/api/shared/${token}/verify`, {
+    method: "POST",
+    body: JSON.stringify({ code }),
+  });
+}
+
+export function getSharedApplications(token) {
+  return sharedFetch(`/api/shared/${token}/applications`);
+}

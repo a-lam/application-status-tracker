@@ -4,7 +4,8 @@
       "Bash(npm install:*)",
       "Bash(npm audit:*)",
       "Bash(npx prisma:*)",
-      "Bash(node src/index.js)"
+      "Bash(node src/index.js)",
+      "Bash(npm run:*)"
     ]
   }
 }

@@ -22,6 +22,7 @@ model User {
   sessions      Session[]
   accounts      Account[]
   applications  Application[]
+  shares        Share[]
 
   @@map("users")
 }
@@ -107,6 +108,50 @@ model Artifact {
 
   @@unique([applicationId, label])
   @@map("artifacts")
+}
+
+model Share {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  email     String
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipientSessions RecipientSession[]
+  rateLimit         ShareRateLimit?
+
+  @@map("shares")
+}
+
+model RecipientSession {
+  id               String    @id @default(cuid())
+  shareId          String
+  codeHash         String
+  codeExpiresAt    DateTime
+  verifiedAt       DateTime?
+  sessionExpiresAt DateTime?
+  createdAt        DateTime  @default(now())
+
+  share Share @relation(fields: [shareId], references: [id], onDelete: Cascade)
+
+  @@map("recipient_sessions")
+}
+
+model ShareRateLimit {
+  id                      String    @id @default(cuid())
+  shareId                 String    @unique
+  lastCodeSentAt          DateTime?
+  verifyAttempts          Int       @default(0)
+  verifyWindowStart       DateTime?
+  failedActionCount       Int       @default(0)
+  failedActionWindowStart DateTime?
+  lockedUntil             DateTime?
+
+  share Share @relation(fields: [shareId], references: [id], onDelete: Cascade)
+
+  @@map("share_rate_limits")
 }
 
 enum ApplicationStatus {

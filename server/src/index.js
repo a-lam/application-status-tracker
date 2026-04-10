@@ -17,6 +17,8 @@ import { getAuth } from "./lib/auth.js";
 import healthRouter from "./routes/health.js";
 import applicationsRouter from "./routes/applications.js";
 import artifactsRouter from "./routes/artifacts.js";
+import sharesRouter from "./routes/shares.js";
+import sharedRouter from "./routes/shared.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const clientDist = path.resolve(__dirname, "../../client/dist");
@@ -65,6 +67,8 @@ app.all("/api/auth/*", toNodeHandler(getAuth()));
 app.use(healthRouter);
 app.use("/api", applicationsRouter);
 app.use("/api", artifactsRouter);
+app.use("/api", sharesRouter);
+app.use("/api", sharedRouter);
 
 // ── Serve React frontend (production) ────────────────────────────────────────
 if (existsSync(clientDist)) {

@@ -169,6 +169,16 @@ export default function ApplicationsListPage() {
                     type="button"
                     role="menuitem"
                     className="kebab-menu__item"
+                    onClick={() => { setMenuOpen(false); navigate("/share"); }}
+                  >
+                    Share
+                  </button>
+                </li>
+                <li role="none">
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="kebab-menu__item"
                     onClick={handleLogout}
                   >
                     Logout

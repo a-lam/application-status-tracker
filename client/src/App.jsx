@@ -7,6 +7,9 @@ import LoginPage from "./pages/LoginPage.jsx";
 import ApplicationsListPage from "./pages/ApplicationsListPage.jsx";
 import AddApplicationPage from "./pages/AddApplicationPage.jsx";
 import EditApplicationPage from "./pages/EditApplicationPage.jsx";
+import SharePage from "./pages/SharePage.jsx";
+import SharedVerifyPage from "./pages/SharedVerifyPage.jsx";
+import SharedViewPage from "./pages/SharedViewPage.jsx";
 
 function ProtectedRoute({ children }) {
   const { data: session, isPending } = authClient.useSession();
@@ -77,6 +80,16 @@ export default function App() {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/share"
+        element={
+          <ProtectedRoute>
+            <SharePage />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/shared/:token" element={<SharedVerifyPage />} />
+      <Route path="/shared/:token/view" element={<SharedViewPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
     </ThemeContext.Provider>
