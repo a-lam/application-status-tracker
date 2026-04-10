@@ -80,11 +80,11 @@
   opacity: 1;
 }
 
-/* ── Dark mode: urgency band colours ────────────────────────────────────────── */
-[data-theme="dark"] .card--urgent { background-color: #3b0f0f; }
-[data-theme="dark"] .card--soon   { background-color: #3b2508; }
-[data-theme="dark"] .card--future { background-color: #052e16; }
-[data-theme="dark"] .card--past   { background-color: #1e2939; }
+/* ── Dark mode: status band colours ─────────────────────────────────────────── */
+[data-theme="dark"] .card--action   { background-color: #052e16; }
+[data-theme="dark"] .card--waiting  { background-color: #2e1065; }
+[data-theme="dark"] .card--accepted { background-color: #022c22; }
+[data-theme="dark"] .card--closed   { background-color: #1e2939; }
 
 /* ── Dark mode: app card ────────────────────────────────────────────────────── */
 [data-theme="dark"] .app-card {
@@ -92,15 +92,11 @@
   border-color: rgba(255,255,255,0.07);
 }
 
-[data-theme="dark"] .app-card--offer-accepted {
-  border: 3px solid rgba(255,255,255,0.75);
-}
-
 /* ── Dark mode: urgency badges (invert bg/text) ──────────────────────────────── */
-[data-theme="dark"] .urgency-badge--urgent { background: #7f1d1d; color: #fca5a5; }
-[data-theme="dark"] .urgency-badge--soon   { background: #78350f; color: #fde68a; }
-[data-theme="dark"] .urgency-badge--future { background: #14532d; color: #86efac; }
-[data-theme="dark"] .urgency-badge--past   { background: #374151; color: #d1d5db; }
+[data-theme="dark"] .urgency-badge--action   { background: #14532d; color: #86efac; }
+[data-theme="dark"] .urgency-badge--waiting  { background: #3b0764; color: #d8b4fe; }
+[data-theme="dark"] .urgency-badge--accepted { background: #064e3b; color: #6ee7b7; }
+[data-theme="dark"] .urgency-badge--closed   { background: #374151; color: #d1d5db; }
 
 /* ── Dark mode: rgba hover backgrounds ──────────────────────────────────────── */
 [data-theme="dark"] .kebab-menu__trigger:hover    { background: rgba(255,255,255,0.07); }
@@ -533,11 +529,11 @@ body {
   gap: 0.875rem;
 }
 
-/* ── Urgency band colours ───────────────────────────────────────────────────── */
-.card--urgent { background-color: #fde8e8; }
-.card--soon   { background-color: #fef9c3; }
-.card--future { background-color: #dcfce7; }
-.card--past   { background-color: #f0f0f0; }
+/* ── Status band colours ────────────────────────────────────────────────────── */
+.card--action   { background-color: #dcfce7; }
+.card--waiting  { background-color: #f3e8ff; }
+.card--accepted { background-color: #a7f3d0; }
+.card--closed   { background-color: #f0f0f0; }
 
 /* ── Application card ───────────────────────────────────────────────────────── */
 .app-card {
@@ -557,9 +553,6 @@ body {
   box-shadow: var(--s-md);
 }
 
-.app-card--offer-accepted {
-  border: 3px solid #000;
-}
 
 .app-card__row1 {
   display: flex;
@@ -761,10 +754,10 @@ body {
   letter-spacing: 0.05em;
 }
 
-.urgency-badge--urgent { background: #fca5a5; color: #7f1d1d; }
-.urgency-badge--soon   { background: #fde68a; color: #78350f; }
-.urgency-badge--future { background: #86efac; color: #14532d; }
-.urgency-badge--past   { background: #d1d5db; color: #374151; }
+.urgency-badge--action   { background: #86efac; color: #14532d; }
+.urgency-badge--waiting  { background: #e9d5ff; color: #581c87; }
+.urgency-badge--accepted { background: #6ee7b7; color: #064e3b; }
+.urgency-badge--closed   { background: #d1d5db; color: #374151; }
 
 /* ── Inline status text ─────────────────────────────────────────────────────── */
 .app-card__status {

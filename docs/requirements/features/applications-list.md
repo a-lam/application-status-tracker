@@ -1,6 +1,6 @@
 # Feature: Applications List
 
-> **Last updated:** 2026-04-07
+> **Last updated:** 2026-04-10
 > **Status:** Implemented
 > **Default page:** This is the default destination for all signed-in users. Any unauthenticated visit to the app root redirects to the login page.
 
@@ -25,34 +25,33 @@
 
 ---
 
-### US-11 — Understand urgency at a glance
+### US-11 — Understand application state at a glance
 
-> As a user, I want applications colour-coded by their status and how soon they are due so that I can quickly identify what still needs my attention without reading every card.
+> As a user, I want applications colour-coded by their status so that I can quickly identify what still needs my attention without reading every card.
 
 **Acceptance criteria:**
 
 | # | Given | When | Then |
 |---|-------|------|------|
-| AC-11-1 | An application's status is `REJECTED`, `WITHDRAWN`, or `OFFER_DECLINED` | The page renders | The application container is displayed with a light grey background, regardless of due date |
-| AC-11-2 | An application's status is `NOT_SUBMITTED` and its due date is in the past (today > due date) | The page renders | The application container is displayed with a light red background (missed the window to submit) |
-| AC-11-3 | An application's status is `NOT_SUBMITTED` and its due date is today or within the next 3 days (0–3 days away) | The page renders | The application container is displayed with a light yellow background (submit soon) |
-| AC-11-4 | An application's status is `NOT_SUBMITTED` and its due date is 4 or more days away | The page renders | The application container is displayed with a light green background |
-| AC-11-5 | An application's status is `SUBMITTED`, `INTERVIEWING`, `OFFER_RECEIVED`, or `OFFER_ACCEPTED` | The page renders | The application container is displayed with a light green background, regardless of due date |
-| AC-11-6 | An application transitions from one colour band to another (e.g. a `NOT_SUBMITTED` application crosses the 3-day deadline threshold) | The page is loaded on that day | The colour updates to reflect the new band — no manual action required |
-| AC-11-7 | An application's status is `OFFER_ACCEPTED` | The page renders | The application card border is rendered bold and black to visually distinguish it from all other cards |
+| AC-11-1 | An application's status is `REJECTED`, `WITHDRAWN`, or `OFFER_DECLINED` | The page renders | The application container is displayed with a light grey background (`closed` band) |
+| AC-11-2 | An application's status is `NOT_SUBMITTED` | The page renders | The application container is displayed with a light green background (`action` band), regardless of due date |
+| AC-11-4 | An application's status is `OFFER_RECEIVED` | The page renders | The application container is displayed with a light green background (`action` band) |
+| AC-11-5 | An application's status is `SUBMITTED` or `INTERVIEWING` | The page renders | The application container is displayed with a light purple background (`waiting` band) |
+| AC-11-5b | An application's status is `OFFER_ACCEPTED` | The page renders | The application container is displayed with a deeper green background (`accepted` band) |
+| AC-11-6 | An application's status changes | The page is loaded after the change | The colour updates to reflect the new band — no manual action required |
 
-> **Colour band rules (status takes priority over deadline):**
+> **Colour band rules (derived from status only — due date is not a factor):**
 >
-> | Status | Past (today > due date) | 0–3 days | 4+ days |
-> |--------|-------------------------|----------|---------|
-> | `NOT_SUBMITTED` | Light red | Light yellow | Light green |
-> | `SUBMITTED` | Light green | Light green | Light green |
-> | `INTERVIEWING` | Light green | Light green | Light green |
-> | `OFFER_RECEIVED` | Light green | Light green | Light green |
-> | `OFFER_ACCEPTED` | Light green | Light green | Light green |
-> | `OFFER_DECLINED` | Light grey | Light grey | Light grey |
-> | `REJECTED` | Light grey | Light grey | Light grey |
-> | `WITHDRAWN` | Light grey | Light grey | Light grey |
+> | Status | Band | Light bg | Dark bg |
+> |--------|------|----------|---------|
+> | `NOT_SUBMITTED` | `action` | `#dcfce7` (light green) | `#052e16` |
+> | `OFFER_RECEIVED` | `action` | `#dcfce7` (light green) | `#052e16` |
+> | `SUBMITTED` | `waiting` | `#f3e8ff` (light purple) | `#2e1065` |
+> | `INTERVIEWING` | `waiting` | `#f3e8ff` (light purple) | `#2e1065` |
+> | `OFFER_ACCEPTED` | `accepted` | `#a7f3d0` (deep green) | `#022c22` |
+> | `OFFER_DECLINED` | `closed` | `#f0f0f0` (light grey) | `#1e2939` |
+> | `REJECTED` | `closed` | `#f0f0f0` (light grey) | `#1e2939` |
+> | `WITHDRAWN` | `closed` | `#f0f0f0` (light grey) | `#1e2939` |
 
 ---
 
@@ -235,8 +234,7 @@
 | FR-APPS-02 | Applications must be returned ordered by `dueDate` ascending (earliest first). |
 | FR-APPS-03 | Each application record must store: `dueDate`, `employer`, `jobTitle`, `jobDescription`, `salaryMin`, `salaryMax`, `salaryCurrency`, `artifacts`, and `status`. |
 | FR-APPS-04 | The `status` field must be constrained to the following enum values: `NOT_SUBMITTED` (default), `SUBMITTED`, `INTERVIEWING`, `OFFER_RECEIVED`, `OFFER_ACCEPTED`, `OFFER_DECLINED`, `REJECTED`, `WITHDRAWN`. |
-| FR-APPS-05 | The UI must derive the urgency colour band from the application's `status` and `dueDate` at render time using the client's local date — no separate field is stored for urgency. |
-| FR-APPS-27 | When an application's status is `OFFER_ACCEPTED`, the application card must render with a bold, black border to visually distinguish it from all other cards. |
+| FR-APPS-05 | The UI must derive the colour band from the application's `status` at render time — no separate field is stored for the band, and due date is not a factor. |
 | FR-APPS-06 | The API endpoint for listing applications must return HTTP 401 if the request has no valid session. |
 | FR-APPS-07 | An add-application button must be present in the top-left of the page header and navigate to the add-application flow when activated. On viewports wider than 480 px the button reads `+ Add an application`; on viewports 480 px wide and narrower it collapses to a single `+` character. The button must carry `aria-label="Add an application"` at all viewport widths. |
 | FR-APPS-08 | When a user has no applications, the page must display an empty state rather than a blank or broken layout. |

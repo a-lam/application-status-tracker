@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { format, differenceInCalendarDays, startOfDay } from "date-fns";
-import { getUrgencyBand } from "../../lib/getUrgencyBand.js";
+import { getStatusBand } from "../../lib/getStatusBand.js";
 import KebabMenu from "./KebabMenu.jsx";
 import ArtifactsPanel from "./ArtifactsPanel.jsx";
 
@@ -41,7 +41,7 @@ export default function ApplicationCard({ application, onStatusUpdate, onDeleteR
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
   const descRef = useRef(null);
-  const band = getUrgencyBand(application.dueDate, application.status);
+  const band = getStatusBand(application.status);
 
   const hasDescription = !!application.jobDescription?.trim();
   const statusLabel = STATUS_LABELS[application.status] ?? application.status;
@@ -61,7 +61,7 @@ export default function ApplicationCard({ application, onStatusUpdate, onDeleteR
 
   return (
     <article
-      className={`app-card card--${band}${application.status === "OFFER_ACCEPTED" ? " app-card--offer-accepted" : ""}`}
+      className={`app-card card--${band}`}
       aria-label={`Application: ${application.jobTitle} at ${application.employer}`}
     >
       <div className="app-card__row1">
