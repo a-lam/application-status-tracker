@@ -1,6 +1,6 @@
 # Module: Applications List
 
-> **Last updated:** 2026-04-07
+> **Last updated:** 2026-04-10
 > **Feature requirements:** [requirements/features/applications-list.md](../../requirements/features/applications-list.md)
 > **Design:** [design/pages/applications-list.md](../../design/pages/applications-list.md)
 
@@ -63,13 +63,19 @@ Receives a pre-sorted array of application objects (sorted by the API). Maps eac
 
 ### `ApplicationCard`
 
-Renders a single application's fields. Calls `getUrgencyBand(dueDate, status)` to determine the CSS class and `formatDueDate(dueDate)` for the date string. Renders `KebabMenu` in the top-right of the title row.
+Renders a single application's fields. Calls `getUrgencyBand(dueDate, status)` to determine the CSS class and `formatDueDate(dueDate)` for the date string.
+
+**Layout:** The top row (`app-card__row1`) is a flex container with `align-items: center`. It contains two children:
+- **Title group** (left, `app-card__title-group`): Job Title, Employer, and Status badge stacked vertically.
+- **Actions group** (right, `app-card__actions`): Due Date and `KebabMenu` side by side, vertically centered with each other (`align-items: center`). The group as a whole aligns to the vertical midpoint of the title group.
+
+A visual separator (subtle `border-top` or `padding-top`) divides the header block (title + employer + status badge) from the metadata block (listing link, job start, salary, description) below.
 
 **Fields displayed (in order):**
-- Job Title with status in parentheses: e.g. `Job Title (Submitted)`, `Job Title (Interviewing)`, `Job Title (Rejected)` — plain text, no badge; full status label mapping in [requirements/features/applications-list.md — AC-12-8 through AC-12-15](../../requirements/features/applications-list.md)
-- `KebabMenu` (`⋮` button) — top-right of the title row
-- Employer (directly below the title row — italicised, smaller font size)
-- Due Date (formatted with days-remaining suffix — see `formatDueDate` below)
+- Job Title — standalone, not combined with status text; `font-size: 1.0625rem–1.125rem`, `font-weight: 700`
+- Employer (directly below the title — italicised, smaller font size)
+- Status badge — small pill/badge below the employer line; colour reflects the application status (see [design/pages/applications-list.md — Status badge colours](../../design/pages/applications-list.md)); full status label mapping in [requirements/features/applications-list.md — AC-12-8 through AC-12-15](../../requirements/features/applications-list.md)
+- Due Date + `KebabMenu` (`⋮` button) — grouped together in the top-right actions block, vertically centered with the title group; due date `font-size: 0.875rem`
 - Job Listing URL — only rendered when present; displayed as a `"View Job Listing →"` anchor element that opens the URL in a new tab (`target="_blank" rel="noopener noreferrer"`); the raw URL is not shown
 - Salary range — only rendered when at least one salary value is present; currency symbol precedes each amount, currency code follows at the end:
   - Both min and max: `[symbol][min]–[symbol][max] [code]` e.g. "$80,000–$120,000 CAD"
@@ -79,9 +85,9 @@ Renders a single application's fields. Calls `getUrgencyBand(dueDate, status)` t
 - "Job Description:" label followed by Job Description text (truncated to 6 lines with "show more" if content overflows)
 - `ArtifactsPanel` — collapsible artifacts section, collapsed by default
 
-**CSS contrast override:** The `.app-card` rule sets `--text-3: #4b5563` (darker than the global `#6b7280`). This ensures all elements using `var(--text-3)` within a card — employer name, description label, status text, artifacts arrow — meet WCAG AA contrast (≥ 4.5:1) against every urgency-band background colour.
+**CSS contrast override:** The `.app-card` rule sets `--text-3: #4b5563` (darker than the global `#6b7280`). This ensures all elements using `var(--text-3)` within a card — employer name, description label, artifacts arrow — meet WCAG AA contrast (≥ 4.5:1) against every urgency-band background colour. Description body text uses `color: var(--text)` (full-contrast primary colour) rather than `var(--text-2)`, ensuring readability on all urgency-band backgrounds including coloured ones. Inline metadata labels (SALARY:, JOB START:) are `0.8125rem`, bold, uppercase.
 
-**Mobile card layout:** At viewports ≤ 480 px the `.app-card__header` row (employer + due date) switches to `flex-direction: column` so the two fields stack vertically instead of competing for horizontal space.
+**Mobile card layout:** At viewports ≤ 480 px the `.app-card__row1` wraps (`flex-wrap: wrap`) so the actions group (due date + kebab) drops below the title group when there is not enough horizontal space. Vertical centring (`align-items: center`) must be verified to look correct after the due date wraps to its own row.
 
 ### `KebabMenu`
 

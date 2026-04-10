@@ -37,7 +37,19 @@ const STATUS_LABELS = {
   WITHDRAWN: "Withdrawn",
 };
 
-export default function ApplicationCard({ application, onStatusUpdate, onDeleteRequest, onArtifactToggle }) {
+const STATUS_BADGE_CLASS = {
+  NOT_SUBMITTED: "status-badge--not-submitted",
+  SUBMITTED:     "status-badge--submitted",
+  INTERVIEWING:  "status-badge--interviewing",
+  OFFER_RECEIVED:"status-badge--offer-received",
+  OFFER_ACCEPTED:"status-badge--offer-accepted",
+  OFFER_DECLINED:"status-badge--offer-declined",
+  REJECTED:      "status-badge--rejected",
+  WITHDRAWN:     "status-badge--withdrawn",
+};
+
+
+export default function ApplicationCard({ application, onStatusUpdate, onDeleteRequest, onArtifactToggle, readOnly = false }) {
   const [expanded, setExpanded] = useState(false);
   const [overflows, setOverflows] = useState(false);
   const descRef = useRef(null);
@@ -45,7 +57,9 @@ export default function ApplicationCard({ application, onStatusUpdate, onDeleteR
 
   const hasDescription = !!application.jobDescription?.trim();
   const statusLabel = STATUS_LABELS[application.status] ?? application.status;
+  const statusBadgeClass = STATUS_BADGE_CLASS[application.status] ?? "status-badge--not-submitted";
   const salaryDisplay = formatSalary(application.salaryMin, application.salaryMax, application.salaryCurrency);
+  const hasMeta = !!(application.jobListingUrl || application.jobStartDate || application.jobStartText || salaryDisplay);
 
   useEffect(() => {
     const el = descRef.current;
@@ -66,45 +80,51 @@ export default function ApplicationCard({ application, onStatusUpdate, onDeleteR
     >
       <div className="app-card__row1">
         <div className="app-card__title-group">
-          <span className="app-card__title">
-            {application.jobTitle}{" "}
-            <span className="app-card__status">({statusLabel})</span>
-          </span>
+          <span className="app-card__title">{application.jobTitle}</span>
           <div className="app-card__employer">{application.employer}</div>
+          <span className={`status-badge ${statusBadgeClass}`}>{statusLabel}</span>
         </div>
-        <span className="app-card__due">Due: {formatDueDate(application.dueDate)}</span>
-        <KebabMenu
-          application={application}
-          onStatusUpdate={onStatusUpdate}
-          onDeleteRequest={onDeleteRequest}
-        />
+        <div className="app-card__actions">
+          <span className="app-card__due">Due: {formatDueDate(application.dueDate)}</span>
+          {!readOnly && (
+            <KebabMenu
+              application={application}
+              onStatusUpdate={onStatusUpdate}
+              onDeleteRequest={onDeleteRequest}
+            />
+          )}
+        </div>
       </div>
 
-      {application.jobListingUrl && (
-        <a
-          className="app-card__listing-link"
-          href={application.jobListingUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          View Job Listing →
-          <span className="sr-only"> for {application.jobTitle} at {application.employer}</span>
-        </a>
-      )}
+      {hasMeta && (
+        <div className="app-card__meta">
+          {application.jobListingUrl && (
+            <a
+              className="app-card__listing-link"
+              href={application.jobListingUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View Job Listing →
+              <span className="sr-only"> for {application.jobTitle} at {application.employer}</span>
+            </a>
+          )}
 
-      {(application.jobStartDate || application.jobStartText) && (
-        <div className="app-card__job-start">
-          <span className="app-card__inline-label">Job Start:</span>
-          {application.jobStartDate
-            ? format(new Date(application.jobStartDate), "d MMM yyyy")
-            : application.jobStartText}
-        </div>
-      )}
+          {(application.jobStartDate || application.jobStartText) && (
+            <div className="app-card__job-start">
+              <span className="app-card__inline-label">Job Start:</span>
+              {application.jobStartDate
+                ? format(new Date(application.jobStartDate), "d MMM yyyy")
+                : application.jobStartText}
+            </div>
+          )}
 
-      {salaryDisplay && (
-        <div className="app-card__salary">
-          <span className="app-card__inline-label">Salary:</span>
-          {salaryDisplay}
+          {salaryDisplay && (
+            <div className="app-card__salary">
+              <span className="app-card__inline-label">Salary:</span>
+              {salaryDisplay}
+            </div>
+          )}
         </div>
       )}
 
@@ -135,6 +155,7 @@ export default function ApplicationCard({ application, onStatusUpdate, onDeleteR
         applicationId={application.id}
         artifacts={application.artifacts}
         onArtifactToggle={onArtifactToggle}
+        readOnly={readOnly}
       />
     </article>
   );

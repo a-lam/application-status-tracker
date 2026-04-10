@@ -1,6 +1,6 @@
 # Page: Applications List
 
-> **Last updated:** 2026-04-07
+> **Last updated:** 2026-04-10
 > **Feature requirements:** [requirements/features/applications-list.md](../../requirements/features/applications-list.md)
 > **Technical module:** [technical/modules/applications-list-module.md](../../technical/modules/applications-list-module.md)
 
@@ -41,7 +41,22 @@ Users land here after signing in and whenever they return to the app.
 | `REJECTED` | Rejected | A rejection has been received |
 | `WITHDRAWN` | Withdrawn | The application has been withdrawn |
 
-Status is displayed inline in the job title line as plain text in parentheses — not as a badge or chip. New applications default to `NOT_SUBMITTED`.
+Status is displayed as a small pill/badge positioned below the employer line inside `.app-card__title-group`. It is not rendered inline with the job title. New applications default to `NOT_SUBMITTED`.
+
+### Status badge colours
+
+| Status | Light mode badge | Dark mode badge |
+|--------|-----------------|-----------------|
+| `NOT_SUBMITTED` | Grey | Grey |
+| `SUBMITTED` | Blue | Blue |
+| `INTERVIEWING` | Purple | Purple |
+| `OFFER_RECEIVED` | Amber | Amber |
+| `OFFER_ACCEPTED` | Green (bold) | Green (bold) |
+| `OFFER_DECLINED` | Orange | Orange |
+| `REJECTED` | Red | Red |
+| `WITHDRAWN` | Grey | Grey |
+
+Dark-mode badge colour tokens reuse and extend the existing `.urgency-badge--*` CSS classes defined in [design/dark-mode.md](../dark-mode.md).
 
 ---
 
@@ -59,7 +74,7 @@ The background colour of each `ApplicationCard` is determined by **status first,
 
 Cards with status `OFFER_ACCEPTED` additionally render with a **bold border** to visually distinguish them from all other cards at a glance. In light mode this is `3px solid #000`; in dark mode it is `3px solid rgba(255,255,255,0.75)`.
 
-All cards scope the CSS custom property `--text-3` to `#4b5563` (darker than the global value of `#6b7280`). This ensures secondary text elements — employer name, description label, status text, artifacts arrow — achieve a contrast ratio of at least 4.5:1 against every light urgency-band background, meeting WCAG AA. In dark mode this scoped value is overridden to `#d1d5db`, which passes 4.5:1 on all four dark urgency band backgrounds.
+All cards scope the CSS custom property `--text-3` to `#4b5563` (darker than the global value of `#6b7280`). This ensures secondary text elements — employer name, description label, artifacts arrow — achieve a contrast ratio of at least 4.5:1 against every light urgency-band background, meeting WCAG AA. In dark mode this scoped value is overridden to `#d1d5db`, which passes 4.5:1 on all four dark urgency band backgrounds. Description body text uses `color: var(--text)` for full primary contrast. Status is no longer rendered as `--text-3` inline text; it is now a coloured badge whose text and background are chosen to meet WCAG AA independently.
 
 Dark-mode urgency band colours are defined in [design/dark-mode.md](../dark-mode.md).
 
@@ -129,58 +144,70 @@ Clicking outside the open menu closes it without taking any action.
 ### Populated list — desktop
 
 ```
-┌────────────────────────────────────────────────────────┐
-│  [+ Add an application]       user@example.com   [⋮]   │
-├────────────────────────────────────────────────────────┤
-│ ┌──────────────────────────────────────────────────┐   │
-│ │ bgcolor: light red                               │   │
-│ │  Senior Frontend Engineer (Not Submitted)    [⋮] │   │
-│ │  Acme Corp              Due: 29 Mar 2026          │   │
-│ │  View Job Listing →                              │   │
-│ │  $90,000–$120,000 CAD                            │   │
-│ │                                                  │   │
-│ │  Job Description:                                │   │
-│ │  We are looking for an experienced engineer...   │   │
-│ │  [show more]  ← only shown when text > 6 lines   │   │
-│ │                                                  │   │
-│ │  ▶ Show artifacts (2/3 completed)               │   │
-│ └──────────────────────────────────────────────────┘   │
-│                                                        │
-│ ┌──────────────────────────────────────────────────┐   │
-│ │ bgcolor: light yellow                            │   │
-│ │  Product Designer (Not Submitted)            [⋮] │   │
-│ │  Globex Inc       Due: 3 Apr 2026 (2 days away)  │   │
-│ │  $70,000+ CAD                                    │   │
-│ │                                                  │   │
-│ │  Job Description:                                │   │
-│ │  Designing for a platform used by millions...    │   │
-│ │  [show more]  ← only shown when text > 6 lines   │   │
-│ │                                                  │   │
-│ │  ▶ Show artifacts (0/3 completed)               │   │
-│ └──────────────────────────────────────────────────┘   │
-│                                                        │
-│ ┌──────────────────────────────────────────────────┐   │
-│ │ bgcolor: light green                             │   │
-│ │  Backend Engineer (Not Submitted)            [⋮] │   │
-│ │  Initech       Due: 20 Apr 2026 (19 days away)   │   │
-│ │                                                  │   │
-│ │  Job Description:                                │   │
-│ │  Join our infrastructure team to build...        │   │
-│ │                                                  │   │
-│ │  ▶ Show artifacts (0/2 completed)               │   │
-│ └──────────────────────────────────────────────────┘   │
-│                                                        │
-│ ┌──────────────────────────────────────────────────┐   │
-│ │ bgcolor: light grey                              │   │
-│ │  Full Stack Developer (Withdrawn)            [⋮] │   │
-│ │  Umbrella Ltd          Due: 10 Mar 2026           │   │
-│ │                                                  │   │
-│ │  Job Description:                                │   │
-│ │  A fast-growing SaaS company...                  │   │
-│ │                                                  │   │
-│ │  ▶ Show artifacts (2/2 completed)               │   │
-│ └──────────────────────────────────────────────────┘   │
-└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│  [+ Add an application]           user@example.com   [⋮]       │
+├────────────────────────────────────────────────────────────────┤
+│ ┌──────────────────────────────────────────────────────────┐   │
+│ │ bgcolor: light red                                       │   │
+│ │  Senior Frontend Engineer                                │   │
+│ │                              Due: 29 Mar 2026        [⋮] │   │  ← due + kebab vertically centered with title group
+│ │  Acme Corp                                               │   │
+│ │  [Not Submitted]                                         │   │  ← status badge, grey pill
+│ │  ─────────────────────────────────────────────────────   │   │  ← separator between header and metadata
+│ │  View Job Listing →                                      │   │
+│ │  $90,000–$120,000 CAD                                    │   │
+│ │                                                          │   │
+│ │  Job Description:                                        │   │
+│ │  We are looking for an experienced engineer...           │   │
+│ │  [show more]  ← only shown when text > 6 lines           │   │
+│ │                                                          │   │
+│ │  ▶ Show artifacts (2/3 completed)                       │   │
+│ └──────────────────────────────────────────────────────────┘   │
+│                                                                │
+│ ┌──────────────────────────────────────────────────────────┐   │
+│ │ bgcolor: light yellow                                    │   │
+│ │  Product Designer                                        │   │
+│ │                    Due: 3 Apr 2026 (2 days away)     [⋮] │   │  ← due + kebab vertically centered with title group
+│ │  Globex Inc                                              │   │
+│ │  [Not Submitted]                                         │   │  ← status badge, grey pill
+│ │  ─────────────────────────────────────────────────────   │   │  ← separator
+│ │  $70,000+ CAD                                            │   │
+│ │                                                          │   │
+│ │  Job Description:                                        │   │
+│ │  Designing for a platform used by millions...            │   │
+│ │  [show more]  ← only shown when text > 6 lines           │   │
+│ │                                                          │   │
+│ │  ▶ Show artifacts (0/3 completed)                       │   │
+│ └──────────────────────────────────────────────────────────┘   │
+│                                                                │
+│ ┌──────────────────────────────────────────────────────────┐   │
+│ │ bgcolor: light green                                     │   │
+│ │  Backend Engineer                                        │   │
+│ │                    Due: 20 Apr 2026 (19 days away)   [⋮] │   │  ← due + kebab vertically centered with title group
+│ │  Initech                                                 │   │
+│ │  [Not Submitted]                                         │   │  ← status badge, grey pill
+│ │  ─────────────────────────────────────────────────────   │   │  ← separator
+│ │                                                          │   │
+│ │  Job Description:                                        │   │
+│ │  Join our infrastructure team to build...                │   │
+│ │                                                          │   │
+│ │  ▶ Show artifacts (0/2 completed)                       │   │
+│ └──────────────────────────────────────────────────────────┘   │
+│                                                                │
+│ ┌──────────────────────────────────────────────────────────┐   │
+│ │ bgcolor: light grey                                      │   │
+│ │  Full Stack Developer                                    │   │
+│ │                              Due: 10 Mar 2026        [⋮] │   │  ← due + kebab vertically centered with title group
+│ │  Umbrella Ltd                                            │   │
+│ │  [Withdrawn]                                             │   │  ← status badge, grey pill
+│ │  ─────────────────────────────────────────────────────   │   │  ← separator
+│ │                                                          │   │
+│ │  Job Description:                                        │   │
+│ │  A fast-growing SaaS company...                          │   │
+│ │                                                          │   │
+│ │  ▶ Show artifacts (2/2 completed)                       │   │
+│ └──────────────────────────────────────────────────────────┘   │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 > **Note:** Dates shown relative to today (1 Apr 2026) for illustration. Acme Corp (Not Submitted, past due) = red — the deadline has passed and the application was never submitted. Globex Inc (Not Submitted, 2 days away) = yellow — deadline is within 3 days; submit soon. Initech (Not Submitted, 19 days away) = green — plenty of time. Umbrella Ltd (Withdrawn) = grey — resolved unfavourably; no further action warranted. Acme Corp shows a full salary range; Globex Inc shows a min-only salary; Initech and Umbrella Ltd have no salary data so no salary line is rendered.
@@ -194,10 +221,12 @@ Clicking outside the open menu closes it without taking any action.
 │ ┌──────────────────────────┐   │
 │ │ bgcolor: light red       │   │
 │ │  Senior Frontend         │   │
-│ │  Engineer (Submitted) [⋮]│   │
-│ │  Acme Corp               │   │  ← employer and due date stack vertically
-│ │  Due: 3 Apr 2026         │   │
+│ │  Engineer                │   │
+│ │  Due: 3 Apr 2026     [⋮] │   │  ← due + kebab vertically centered; wrap onto next line on mobile
 │ │  (2 days away)           │   │
+│ │  Acme Corp               │   │
+│ │  [Submitted]             │   │  ← status badge, blue pill
+│ │  ───────────────────     │   │  ← separator
 │ │  $90,000–$120,000 CAD    │   │
 │ │                          │   │
 │ │  Job Description:        │   │
@@ -212,20 +241,23 @@ Clicking outside the open menu closes it without taking any action.
 ### Artifacts panel — expanded state
 
 ```
-│ ┌──────────────────────────────────────────────────┐   │
-│ │  Senior Frontend Engineer (Submitted)        [⋮] │   │
-│ │  Acme Corp        Due: 3 Apr 2026 (2 days away)  │   │
-│ │  $90,000–$120,000 CAD                            │   │
+│ ┌──────────────────────────────────────────────────────────┐   │
+│ │  Senior Frontend Engineer                                │   │
+│ │                    Due: 3 Apr 2026 (2 days away)     [⋮] │   │  ← due + kebab vertically centered with title group
+│ │  Acme Corp                                               │   │
+│ │  [Submitted]                                             │   │  ← status badge, blue pill
+│ │  ─────────────────────────────────────────────────────   │   │  ← separator
+│ │  $90,000–$120,000 CAD                                    │   │
 │ │                                                  │   │
-│ │  Job Description:                                │   │
-│ │  We are looking for an experienced engineer...   │   │
-│ │  [show more]                                     │   │
-│ │                                                  │   │
-│ │  ▼ Hide artifacts (2/3 completed)               │   │
-│ │    ☑ CV                                         │   │
-│ │    ☑ Cover Letter                               │   │
-│ │    ☐ Portfolio                                  │   │
-│ └──────────────────────────────────────────────────┘   │
+│ │  Job Description:                                        │   │
+│ │  We are looking for an experienced engineer...           │   │
+│ │  [show more]                                             │   │
+│ │                                                          │   │
+│ │  ▼ Hide artifacts (2/3 completed)                       │   │
+│ │    ☑ CV                                                 │   │
+│ │    ☑ Cover Letter                                       │   │
+│ │    ☐ Portfolio                                          │   │
+│ └──────────────────────────────────────────────────────────┘   │
 ```
 
 > Clicking the `▼ Hide artifacts (2/3 completed)` header collapses the panel and the label reverts to `▶ Show artifacts (2/3 completed)`. Clicking a checkbox immediately updates the checked state and recalculates the count in the header.
@@ -235,31 +267,33 @@ Clicking outside the open menu closes it without taking any action.
 ### Kebab menu open (example: Not Submitted application)
 
 ```
-│ ┌──────────────────────────────────────────────────┐   │
-│ │  Product Designer (Not Submitted)        [⋮] ←  │   │
-│ │  Globex Inc   Due: 6 Apr 2026 (5 days away)  │   │   │
-│ │                                    ┌────────────┤   │
-│ │                      Update Status ▶            │   │
-│ │                      Edit Application           │   │
-│ │                      Delete Application         │   │
-│ │                                    └────────────┘   │
-│ └──────────────────────────────────────────────────┘   │
+│ ┌──────────────────────────────────────────────────────────┐   │
+│ │  Product Designer                                        │   │
+│ │          Due: 6 Apr 2026 (5 days away)           [⋮] ←  │   │  ← due + kebab vertically centered
+│ │  Globex Inc                          ┌────────────┤      │   │
+│ │  [Not Submitted]                                         │   │
+│ │                        Update Status ▶            │      │   │
+│ │                        Edit Application           │      │   │
+│ │                        Delete Application         │      │   │
+│ │                                      └────────────┘      │   │
+│ └──────────────────────────────────────────────────────────┘   │
 
 ### Status submenu open
 
-│ ┌──────────────────────────────────────────────────┐   │
-│ │  Product Designer (Not Submitted)        [⋮] ←  │   │
-│ │  Globex Inc   Due: 6 Apr 2026 (5 days away)  │   │   │
-│ │                          ┌─────────────┬─────────┤   │
-│ │            Update Status ▶  Submitted  │         │   │
-│ │            Edit Applicati│  Interviewing         │   │
-│ │            Delete Applic.│  Offer Received       │   │
-│ │                          │  Offer Accepted       │   │
-│ │                          │  Offer Declined       │   │
-│ │                          │  Rejected             │   │
-│ │                          │  Withdrawn │          │   │
-│ │                          └────────────┘          │   │
-│ └──────────────────────────────────────────────────┘   │
+│ ┌──────────────────────────────────────────────────────────┐   │
+│ │  Product Designer                                        │   │
+│ │          Due: 6 Apr 2026 (5 days away)           [⋮] ←  │   │  ← due + kebab vertically centered
+│ │  Globex Inc                ┌─────────────┬───────────────┤   │
+│ │  [Not Submitted]                                         │   │
+│ │            Update Status ▶  Submitted    │               │   │
+│ │            Edit Applicati│  Interviewing │               │   │
+│ │            Delete Applic.│  Offer Received               │   │
+│ │                          │  Offer Accepted               │   │
+│ │                          │  Offer Declined               │   │
+│ │                          │  Rejected     │               │   │
+│ │                          │  Withdrawn    │               │   │
+│ │                          └───────────────┘               │   │
+│ └──────────────────────────────────────────────────────────┘   │
 ```
 
 ### Delete confirmation dialog
@@ -317,18 +351,20 @@ Clicking outside the open menu closes it without taking any action.
 Each card consistently presents fields in the same order:
 
 ```
-┌──────────────────────────────────────────────────┐
-│  [Job Title] ([Status])                      [⋮] │
-│  [Employer — italic, smaller]   Due: [date str]   │
-│  [View Job Listing →]  ← only rendered when present │
-│  [Salary range — omitted when no salary present]  │
-│                                                   │
-│  Job Description:                                 │
-│  [Description text — clamped to 6 lines]          │
-│  [show more]  ← only rendered when text overflows │
-│                                                   │
-│  ▶ Show artifacts (X/Y completed)  ← collapsed    │
-└──────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────┐
+│  [Job Title]                     Due: [date str]       [⋮] │  ← due date + kebab grouped right,
+│  [Employer — italic, smaller]                              │     vertically centered with title group
+│  [Status badge — pill]                                     │
+│  ─────────────────────────────────────────────────────     │  ← separator between header and metadata
+│  [View Job Listing →]  ← only rendered when present        │
+│  [Salary range — omitted when no salary present]           │
+│                                                            │
+│  Job Description:                                          │
+│  [Description text — clamped to 6 lines]                   │
+│  [show more]  ← only rendered when text overflows          │
+│                                                            │
+│  ▶ Show artifacts (X/Y completed)  ← collapsed             │
+└────────────────────────────────────────────────────────────┘
 
 Expanded:
 
@@ -342,8 +378,9 @@ Expanded:
 ```
 
 **Status display:**
-- Rendered inline with the job title, e.g. `Job Title (Submitted)`, `Job Title (Interviewing)`, `Job Title (Rejected)`
-- Plain text — no badge, chip, or colour applied to the status text itself
+- Rendered as a small pill/badge positioned below the employer line inside `.app-card__title-group`
+- Order within title group: Job Title → Employer → Status badge
+- Badge colour reflects the application status — see [Status badge colours](#status-badge-colours) above
 - Full enum-to-label mapping: see [Application Status](#application-status) table above
 
 **Date string format:**
@@ -363,9 +400,12 @@ Expanded:
 - Neither present: salary line is not rendered at all
 - Currency symbol mapping: CAD → $, USD → $, EUR → €, GBP → £, AUD → $, JPY → ¥, KRW → ₩
 
-**Employer typography:**
-- Font size: smaller than the job title (e.g. `0.85rem` vs `1rem`)
-- Font style: italic
+**Typography:**
+- Job title: `1.0625rem–1.125rem`, `font-weight: 700` — larger than body text to anchor each card visually
+- Employer: `0.85rem`, italic — smaller than the job title
+- Due date: `0.875rem` — slightly larger than its previous `0.8125rem` to increase prominence
+- Inline metadata labels (SALARY:, JOB START:): `0.8125rem`, bold, uppercase — raised from `0.75rem` for legibility
+- Description body text: `color: var(--text)` — full-contrast primary text colour, not `var(--text-2)`, to ensure readability against all urgency-band backgrounds
 
 ---
 
@@ -388,4 +428,4 @@ Expanded:
 - All interactive controls (kebab trigger buttons, artifacts panel toggle, add-application button) must have a minimum touch target size of 44 × 44 px
 - All CSS transitions must be disabled when `prefers-reduced-motion: reduce` is set at the OS level
 - The "View Job Listing →" link must include `rel="noopener noreferrer"` when `target="_blank"` is set, and must have a visually-hidden screen-reader supplement if the link text alone is not sufficiently descriptive in context (e.g. `<span class="sr-only"> for [Job Title] at [Employer]</span>`)
-- Secondary text within cards (employer name, status, description label, artifacts arrow) must achieve a contrast ratio of at least 4.5:1 against all urgency-band backgrounds. This is enforced by scoping `--text-3` to `#4b5563` within `.app-card`
+- Secondary text within cards (employer name, description label, artifacts arrow) must achieve a contrast ratio of at least 4.5:1 against all urgency-band backgrounds. This is enforced by scoping `--text-3` to `#4b5563` within `.app-card`. Description body text uses `color: var(--text)` (full primary contrast) rather than `var(--text-2)`. Status badge colours must also achieve ≥ 4.5:1 contrast against their badge background in both light and dark modes

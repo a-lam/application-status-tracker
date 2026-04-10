@@ -40,8 +40,8 @@ client/src/
 │                                     read-only applications list with "Shared by" label
 └── components/
     └── shared/
-        ├── SharedApplicationList.jsx   ← Renders the ordered list of read-only application cards
-        └── SharedApplicationCard.jsx   ← Read-only application card; artifacts frozen
+        └── SharedApplicationList.jsx   ← Renders the ordered list of read-only cards using
+                                          ApplicationCard with readOnly prop
 ```
 
 ---
@@ -90,12 +90,16 @@ On mount, calls `GET /api/shared/:token/applications`:
 
 No "Add application" button, no page-level kebab, and no per-card kebab. Artifact checkboxes rendered with `disabled` attribute and `pointer-events: none`.
 
-### `SharedApplicationCard`
+### Read-only card rendering
 
-Mirrors `ApplicationCard` with all interactive controls removed:
-- No `KebabMenu`.
-- `ArtifactsPanel` renders with all checkboxes `disabled`. The toggle to expand/collapse still works (read-only display only).
-- Urgency colour band and all field display logic are identical to `ApplicationCard`.
+The shared view renders cards using `ApplicationCard` with `readOnly={true}`. This is not a separate component — the same `ApplicationCard` used in the authenticated list is reused directly.
+
+When `readOnly` is set:
+- `KebabMenu` is not rendered.
+- `ArtifactsPanel` receives `readOnly={true}`, which disables all checkboxes and applies `pointer-events: none`. The expand/collapse toggle remains functional.
+- All other card behaviour (colour band, status badge, field layout, description clamp) is identical to the authenticated view.
+
+A separate card component for the shared view must not be created, as it will inevitably diverge from `ApplicationCard` over time.
 
 ---
 
@@ -287,7 +291,7 @@ Logic:
 3. Server validates recipient-session cookie → verifies RecipientSession and Share
 4. Server returns { sharerEmail, applications }
 5. SharedViewPage renders SharedApplicationList with sharerEmail banner at top
-6. Each SharedApplicationCard renders in read-only mode (no kebab, frozen artifacts)
+6. Each ApplicationCard renders with readOnly={true} (no kebab, frozen artifacts)
 ```
 
 ### Revoke Share

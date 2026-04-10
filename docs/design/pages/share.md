@@ -177,8 +177,11 @@ Displays the sharer's applications in a read-only layout identical to the authen
 ├────────────────────────────────────────────────────────┤
 │ ┌──────────────────────────────────────────────────┐   │
 │ │ bgcolor: light red                               │   │
-│ │  Senior Frontend Engineer (Not Submitted)        │   │
-│ │  Acme Corp              Due: 29 Mar 2026          │   │
+│ │  Senior Frontend Engineer                        │   │
+│ │                         Due: 29 Mar 2026         │   │  ← no kebab; due date still right-aligned
+│ │  Acme Corp                                       │   │
+│ │  [Not Submitted]                                 │   │  ← same status badge as authenticated view
+│ │  ──────────────────────────────────────────────  │   │  ← separator between header and metadata
 │ │  View Job Listing →                              │   │
 │ │  $90,000–$120,000 CAD                            │   │
 │ │                                                  │   │
@@ -186,7 +189,7 @@ Displays the sharer's applications in a read-only layout identical to the authen
 │ │  We are looking for an experienced engineer...   │   │
 │ │  [show more]                                     │   │
 │ │                                                  │   │
-│ │  ▶ Show artifacts (2/3 completed)               │   │
+│ │  ▶ Show artifacts (2/3 completed)                │   │
 │ └──────────────────────────────────────────────────┘   │
 │                                                        │
 │  ... more cards ...                                    │
@@ -195,6 +198,8 @@ Displays the sharer's applications in a read-only layout identical to the authen
 
 **Differences from the authenticated list:**
 
+The shared view is identical to the authenticated list at the card level, with only the following elements removed or changed:
+
 | Element | Authenticated list | Shared view |
 |---------|-------------------|-------------|
 | Add application button | Present | Absent |
@@ -202,6 +207,10 @@ Displays the sharer's applications in a read-only layout identical to the authen
 | User email in header | Present | Replaced by "Shared by: [email]" banner |
 | Per-card kebab (`⋮`) | Present | Absent |
 | Artifact checkboxes | Interactive | `disabled`, non-interactive |
+
+Everything else — card background colour, status badge style and colour, field layout and order, salary/job-start/listing display, description clamp and expand, and artifact panel expand/collapse — is **identical** to the authenticated view. No other differences are permitted.
+
+**Implementation note:** The shared view must render cards using the same `ApplicationCard` component as the authenticated list, with a `readOnly` prop that suppresses the kebab menu and disables artifact checkboxes. A separate card component for the shared view is not permitted, as it will inevitably diverge.
 
 **Artifacts in read-only mode:** The `ArtifactsPanel` expand/collapse toggle remains functional so recipients can see artifact labels and completion states. The checkboxes are rendered with the `disabled` attribute and `pointer-events: none` to prevent interaction; their visual state (checked/unchecked) is preserved.
 

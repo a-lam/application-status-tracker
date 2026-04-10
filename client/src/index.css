@@ -596,6 +596,13 @@ body {
   margin-bottom: 0.75rem;
 }
 
+.app-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
 .app-card__title-group {
   flex: 1;
   display: flex;
@@ -603,8 +610,8 @@ body {
 }
 
 .app-card__title {
-  font-weight: 600;
-  font-size: 1rem;
+  font-weight: 700;
+  font-size: 1.0625rem;
   line-height: 1.4;
   color: var(--text);
 }
@@ -616,10 +623,20 @@ body {
 }
 
 .app-card__due {
-  font-size: 0.8125rem;
+  font-size: 0.875rem;
   color: var(--text-2);
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+.app-card__meta {
+  border-top: 1px solid rgba(0,0,0,0.07);
+  padding-top: 0.625rem;
+  margin-bottom: 0.25rem;
+}
+
+[data-theme="dark"] .app-card__meta {
+  border-top-color: rgba(255,255,255,0.07);
 }
 
 .app-card__job-start {
@@ -645,7 +662,7 @@ body {
 .app-card__description {
   margin-bottom: 0.75rem;
   font-size: 0.875rem;
-  color: var(--text-2);
+  color: var(--text);
 }
 
 .app-card__description-label {
@@ -660,7 +677,7 @@ body {
 
 .app-card__inline-label {
   font-weight: 600;
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   margin-right: 0.35em;
   color: var(--text-3);
   text-transform: uppercase;
@@ -809,12 +826,36 @@ body {
 .urgency-badge--accepted { background: #6ee7b7; color: #064e3b; }
 .urgency-badge--closed   { background: #d1d5db; color: #374151; }
 
-/* ── Inline status text ─────────────────────────────────────────────────────── */
-.app-card__status {
-  font-weight: 400;
-  font-size: 0.875rem;
-  color: var(--text-3);
+/* ── Status badge ───────────────────────────────────────────────────────────── */
+.status-badge {
+  display: inline-block;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-top: 0.3rem;
+  width: fit-content;
 }
+
+.status-badge--not-submitted { background: #d1d5db; color: #374151; }
+.status-badge--submitted      { background: #bfdbfe; color: #1e40af; }
+.status-badge--interviewing   { background: #e9d5ff; color: #581c87; }
+.status-badge--offer-received { background: #fde68a; color: #92400e; }
+.status-badge--offer-accepted { background: #6ee7b7; color: #064e3b; font-weight: 700; }
+.status-badge--offer-declined { background: #fed7aa; color: #9a3412; }
+.status-badge--rejected       { background: #fecaca; color: #991b1b; }
+.status-badge--withdrawn      { background: #d1d5db; color: #374151; }
+
+[data-theme="dark"] .status-badge--not-submitted { background: #374151; color: #d1d5db; }
+[data-theme="dark"] .status-badge--submitted      { background: #1e3a8a; color: #bfdbfe; }
+[data-theme="dark"] .status-badge--interviewing   { background: #3b0764; color: #d8b4fe; }
+[data-theme="dark"] .status-badge--offer-received { background: #78350f; color: #fde68a; }
+[data-theme="dark"] .status-badge--offer-accepted { background: #064e3b; color: #6ee7b7; }
+[data-theme="dark"] .status-badge--offer-declined { background: #7c2d12; color: #fed7aa; }
+[data-theme="dark"] .status-badge--rejected       { background: #7f1d1d; color: #fecaca; }
+[data-theme="dark"] .status-badge--withdrawn      { background: #374151; color: #d1d5db; }
 
 /* ── Kebab menu ─────────────────────────────────────────────────────────────── */
 .kebab-menu { position: relative; }
